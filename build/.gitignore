@@ -1,0 +1,9 @@
+# ignore everything
+*
+
+# except these
+!.gitignore
+!README.md
+# allow specially saved final results to be committed
+!*Final*
+!*final*

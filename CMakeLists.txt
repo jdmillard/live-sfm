@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+set(CMAKE_CXX_STANDARD 11)
+project( live-sfm )
+find_package( OpenCV REQUIRED )
+add_executable( live-sfm main.cpp )
+target_link_libraries( live-sfm ${OpenCV_LIBS} )
