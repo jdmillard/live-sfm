@@ -4,5 +4,5 @@
 #include <fstream>
 
 // include the custom classes for detection and sfm
-#include "classy.h"
 #include "detectors.h"
+#include "sfm.h"

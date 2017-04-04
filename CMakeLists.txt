@@ -14,7 +14,7 @@ include_directories( include )
 # source files to compile
 add_executable( live-sfm
                 src/main.cpp
-                src/classy.cpp
-                src/detectors.cpp)
+                src/detectors.cpp
+                src/sfm.cpp )
 
 target_link_libraries( live-sfm ${OpenCV_LIBS} )
