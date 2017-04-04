@@ -23,3 +23,11 @@ int SphereDetector::getVal()
 {
   return my_pri_val;
 }
+
+void SphereDetector::newFrame(cv::Mat frame_in)
+{
+  // a new frame is passed in and circles need to be detected
+  cvtColor(frame_in, frame, CV_BGR2GRAY);
+  //frame = frame_in;
+
+}

@@ -39,23 +39,31 @@ int main(int argc, char **argv)
   moveWindow("The Frame", 50, 50);
 
 
-  SphereDetector nextTest(13);
+  SphereDetector sfm(13);
 
-  std::cout << nextTest.my_pub_val << std::endl;
-  std::cout << nextTest.my_pub_valy << std::endl;
-  std::cout << nextTest.getVal() << std::endl;
-  std::cout << nextTest.getValy() << std::endl;
+  std::cout << sfm.my_pub_val << std::endl;
+  std::cout << sfm.my_pub_valy << std::endl;
+  std::cout << sfm.getVal() << std::endl;
+  std::cout << sfm.getValy() << std::endl;
 
 
   Mat frame;
 
   while (true)
   {
+    // update frame and check that it isn't empty
     video >> frame;
-    std::cout << frame.size() << std::endl;
+    if (frame.empty())
+    {
+      break;
+    }
 
-    imshow("The Frame", frame);
+    sfm.newFrame(frame);
 
+    // display the frame
+    imshow("The Frame", sfm.frame);
+
+    // allow user to cycle through frames individually
     int key = waitKey();
     if (key == 110) {
       // the 'n' (next) key was pressed
@@ -68,8 +76,6 @@ int main(int argc, char **argv)
 
 
 
-  }
-
-
+  } // end of while loop for video
   std::cout << "terminating" << std::endl;
-}
+} // end of main

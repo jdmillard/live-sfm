@@ -4,12 +4,17 @@
 
 #include "sfm.h"
 
+// note about additional detectors
+// decide convention for notes in .ccp or .h
+
 class SphereDetector: public StructureFromMotion
 {
 	public:
 		SphereDetector(int in_var);
 	  int getVal();
 	  int my_pub_val;
+		void newFrame(cv::Mat frame_in);
+		cv::Mat frame;
 
 	private:
 		int my_pri_val;
