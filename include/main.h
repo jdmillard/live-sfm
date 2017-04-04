@@ -5,4 +5,3 @@
 
 // include the custom classes for detection and sfm
 #include "detectors.h"
-#include "sfm.h"

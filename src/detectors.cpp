@@ -16,6 +16,7 @@ circleFinder::circleFinder(int in_var)
 {
   my_pri_val = in_var;
   my_pub_val = in_var;
+  setValy(in_var);
 }
 
 int circleFinder::getVal()

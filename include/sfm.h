@@ -4,12 +4,12 @@
 
 class myTestClass
 {
-public:
-	myTestClass(int in_var);
-  int getVal();
-  int my_pub_val;
+	public:
+	  int getValy();
+		void setValy(int set_val_int);
+	  int my_pub_valy;
 
-private:
-	int my_pri_val;
+	private:
+		int my_pri_valy;
 
 };

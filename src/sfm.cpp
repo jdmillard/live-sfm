@@ -2,13 +2,13 @@
 
 using namespace cv;
 
-myTestClass::myTestClass(int in_var)
+void myTestClass::setValy(int set_val_int)
 {
-  my_pri_val = in_var;
-  my_pub_val = in_var;
+  my_pri_valy = set_val_int;
+  my_pub_valy = set_val_int;
 }
 
-int myTestClass::getVal()
+int myTestClass::getValy()
 {
-  return my_pri_val;
+  return my_pri_valy;
 }
