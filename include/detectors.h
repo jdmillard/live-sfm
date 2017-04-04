@@ -4,10 +4,10 @@
 
 #include "sfm.h"
 
-class circleFinder: public myTestClass
+class SphereDetector: public StructureFromMotion
 {
 	public:
-		circleFinder(int in_var);
+		SphereDetector(int in_var);
 	  int getVal();
 	  int my_pub_val;
 

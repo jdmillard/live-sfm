@@ -2,7 +2,7 @@
 #include <string> // needed for setting std::strings and using to_string
 #include <fstream>
 
-class myTestClass
+class StructureFromMotion
 {
 	public:
 	  int getValy();

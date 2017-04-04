@@ -18,8 +18,8 @@ int main(int argc, char **argv)
   // leaning towards hough circles
 
 
-  circleFinder nextTest(13);
-  circleFinder nextTest2(14);
+  SphereDetector nextTest(13);
+  SphereDetector nextTest2(14);
   std::cout << nextTest.my_pub_val << std::endl;
   std::cout << nextTest.my_pub_valy << std::endl;
   std::cout << nextTest.getVal() << std::endl;
