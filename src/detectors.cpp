@@ -24,10 +24,40 @@ int SphereDetector::getVal()
   return my_pri_val;
 }
 
-void SphereDetector::newFrame(cv::Mat frame_in)
+void SphereDetector::newFrame(Mat frame_in)
 {
   // a new frame is passed in and circles need to be detected
   cvtColor(frame_in, frame, CV_BGR2GRAY);
+
+  // blur (not sure if needed)
+  //GaussianBlur(frame, frame, Size(9,9), 2,2);
+
+  // perform HoughCircles on the grayscale image
+  std::vector<Vec3f> circles;
+  double dp = 1;
+  double minDist = 1;
+  double param1 = 150;
+  double param2 = 100;
+  int minRadius = 0;
+  int maxRadius = 0;
+  HoughCircles(frame, circles, CV_HOUGH_GRADIENT, dp, minDist, param1, param2, minRadius, maxRadius);
+
+
+
+  drawCircles(frame_in, circles);
   //frame = frame_in;
 
+  //frame = frame_in;
+
+}
+
+void SphereDetector::drawCircles(Mat img, std::vector<Vec3f>& circles)
+{
+  std::cout << "---" << std::endl;
+  for (int i=0; i<circles.size(); i++)
+  {
+    std::cout << "worked" << std::endl;
+    circle(img, Point2f(circles[i][0],circles[i][1]), circles[i][2],  Scalar(0, 255, 0), 2 );
+  }
+  //std::cout << "worked" << std::endl;
 }
