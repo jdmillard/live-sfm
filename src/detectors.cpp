@@ -50,25 +50,24 @@ void SphereDetector::newFrame(Mat frame_in)
   // at this point, clean edges are expected around the circles
 
   // blur the resulting white lines in order to find circles easier
-  int blur_size2 = 35;    // size of the blur kernel
-  int sigma2 = 5;         // variance
+  int blur_size2 = 15;    // size of the blur kernel
+  int sigma2 = 3;         // variance
   GaussianBlur(frame, frame, Size(blur_size2, blur_size2), sigma2, sigma2);
 
   // perform HoughCircles on the edges
   std::vector<Vec3f> circles;
-  double dp = 2;
-  double minDist = 30;
-  double param1 = 50;
-  double param2 = 140;
-  int minRadius = 0;
-  int maxRadius = 110;
+  double dp = 2;          // inverse ratio of resolutions
+  double minDist = 40;    // minimum distance between circle centers (relaxed)
+  double param1 = 80;     // hysteresis thresholds for canny
+  double param2 = 60;     // smaller means more false circles detected
+  int minRadius = 20;     // minimum radius (relaxed)
+  int maxRadius = 100;    // minimum radius (relaxed)
   HoughCircles(frame, circles, CV_HOUGH_GRADIENT, dp, minDist, param1, param2, minRadius, maxRadius);
 
 
   cvtColor(frame, frame, CV_GRAY2BGR);
 
-  drawCircles(frame, circles);
-  //frame = frame_in;
+  drawCircles(frame_in, circles);
 
   //frame = frame_in;
 
@@ -76,11 +75,15 @@ void SphereDetector::newFrame(Mat frame_in)
 
 void SphereDetector::drawCircles(Mat img, std::vector<Vec3f>& circles)
 {
-  std::cout << "---" << std::endl;
+  // the purpose of this method is to easily draw circles wherever detected
+
+  Scalar color = Scalar(255, 0, 0);
+  int thickness = 2;
+  // cycle through each known circle
   for (int i=0; i<circles.size(); i++)
   {
-    std::cout << "worked" << std::endl;
-    circle(img, Point2f(circles[i][0],circles[i][1]), circles[i][2],  Scalar(0, 255, 0), 2 );
+    Point2f center = Point2f(circles[i][0],circles[i][1]);
+    circle(img, center, circles[i][2], color, thickness );
   }
   //std::cout << "worked" << std::endl;
 }
