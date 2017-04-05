@@ -39,7 +39,9 @@ void SphereDetector::newFrame(Mat frame_in)
 
 	// perform open and close to clean up the foreground
 	int morph_size = 4;     // high number makes circles boxy
-  Mat element = getStructuringElement(MORPH_RECT, Size(2*morph_size + 1, 2*morph_size+1), Point(morph_size, morph_size));
+  Mat element = getStructuringElement(MORPH_RECT,
+                                      Size(2*morph_size + 1, 2*morph_size+1),
+                                      Point(morph_size, morph_size));
   morphologyEx(frame, frame, MORPH_OPEN, element );
 
   // detect the edges
@@ -62,12 +64,52 @@ void SphereDetector::newFrame(Mat frame_in)
   double param2 = 60;     // smaller means more false circles detected
   int minRadius = 20;     // minimum radius (relaxed)
   int maxRadius = 100;    // minimum radius (relaxed)
-  HoughCircles(frame, circles, CV_HOUGH_GRADIENT, dp, minDist, param1, param2, minRadius, maxRadius);
+  HoughCircles(frame, circles, CV_HOUGH_GRADIENT,
+               dp, minDist, param1, param2,
+               minRadius, maxRadius);
+
+
+
+  // clean up circles by checking the color variance at each location
+  namedWindow("The Frame2", CV_WINDOW_AUTOSIZE);
+  moveWindow("The Frame2", 50, 50);
+
+
+  for (int i=0; i<circles.size(); i++)
+  {
+    double x = circles[i][0];
+    double y = circles[i][1];
+    double r = circles[i][2];
+    double d = r/sqrt(2);
+
+    // select the square inside the current circle
+    Mat inside(frame_in, Rect(x-d, y-d, 2*d, 2*d));
+
+    // look at statistics of the subimage
+    
+
+
+    // display the frame
+    imshow("The Frame2", inside);
+
+    // allow user to cycle through frames individually
+    int key = waitKey();
+    if (key == 110) {
+      // the 'n' (next) key was pressed
+    } else if (key == 27) {
+      // the 'esc' key was pressed, end application
+    }
+
+  }
+
+
+
+
 
 
   cvtColor(frame, frame, CV_GRAY2BGR);
 
-  drawCircles(frame_in, circles);
+  drawCircles(frame, circles);
 
   //frame = frame_in;
 
