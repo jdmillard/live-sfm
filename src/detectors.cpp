@@ -26,25 +26,38 @@ int SphereDetector::getVal()
 
 void SphereDetector::newFrame(Mat frame_in)
 {
-  // a new frame is passed in and circles need to be detected
-  cvtColor(frame_in, frame, CV_BGR2GRAY);
 
-  // blur (not sure if needed)
-  //GaussianBlur(frame, frame, Size(9,9), 2,2);
+  //not sure if blur is needed, if it goes before or after, or which type
+  //before seems common
+  // guassian blur params
+  GaussianBlur(frame_in, frame, Size(9,9), 2,2);
+
+  // a new frame is passed in and circles need to be detected
+  cvtColor(frame, frame, CV_BGR2GRAY);
+
+	// morphology params
+	int morph_size = 10;   // kernel size
+  Mat element = getStructuringElement( MORPH_RECT, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
+  morphologyEx( frame, frame, MORPH_OPEN, element );
+
+  // canny
+  Canny(frame, frame, 50, 100);
 
   // perform HoughCircles on the grayscale image
+  /*
   std::vector<Vec3f> circles;
   double dp = 1;
-  double minDist = 1;
-  double param1 = 150;
-  double param2 = 100;
+  double minDist = 100;
+  double param1 = 80;
+  double param2 = 40;
   int minRadius = 0;
-  int maxRadius = 0;
+  int maxRadius = 100;
   HoughCircles(frame, circles, CV_HOUGH_GRADIENT, dp, minDist, param1, param2, minRadius, maxRadius);
+  */
 
 
 
-  drawCircles(frame_in, circles);
+  //drawCircles(frame_in, circles);
   //frame = frame_in;
 
   //frame = frame_in;
