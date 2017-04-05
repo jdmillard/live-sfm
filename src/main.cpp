@@ -61,7 +61,7 @@ int main(int argc, char **argv)
     sfm.newFrame(frame);
 
     // display the frame
-    imshow("The Frame", sfm.frame);
+    imshow("The Frame", frame);
 
     // allow user to cycle through frames individually
     int key = waitKey();
