@@ -37,38 +37,159 @@ void SphereDetector::newFrame(Mat frame_in)
   int sigma = 5;          // variance
   GaussianBlur(frame, frame, Size(blur_size, blur_size), sigma, sigma);
 
-	// perform open and close to clean up the foreground
-	int morph_size = 4;     // high number makes circles boxy
+  // detect the edges
+  double thresh1 = 80;    // if pixel gradient is higher than this, accepted
+  double thresh2 = 40;    // if pixel gradient is lower than this, rejected
+  Canny(frame, frame, thresh1, thresh2);
+
+  // make detected edges thicker to make contours more continuous
+	int morph_size = 2;
   Mat element = getStructuringElement(MORPH_RECT,
                                       Size(2*morph_size + 1, 2*morph_size+1),
                                       Point(morph_size, morph_size));
-  morphologyEx(frame, frame, MORPH_OPEN, element );
+  dilate(frame, frame, element);
 
-  // detect the edges
-  double thresh1 = 80;    // hysteresis threshold 1, low as possible
-  double thresh2 = 80;    // hysteresis threshold 2, low as possible
-  Canny(frame, frame, thresh1, thresh2);
+  //
+  std::vector<std::vector<Point>> contours;
+  findContours(frame, contours, RETR_LIST, CHAIN_APPROX_NONE);
 
-  // at this point, clean edges are expected around the circles
 
-  // blur the resulting white lines in order to find circles easier
-  int blur_size2 = 15;    // size of the blur kernel
-  int sigma2 = 3;         // variance
-  GaussianBlur(frame, frame, Size(blur_size2, blur_size2), sigma2, sigma2);
 
-  // perform HoughCircles on the edges
+  // fit circles to the points
+
+
+
+
   std::vector<Vec3f> circles;
-  double dp = 2;          // inverse ratio of resolutions
-  double minDist = 40;    // minimum distance between circle centers (relaxed)
-  double param1 = 80;     // hysteresis thresholds for canny
-  double param2 = 60;     // smaller means more false circles detected
-  int minRadius = 20;     // minimum radius (relaxed)
-  int maxRadius = 100;    // minimum radius (relaxed)
-  HoughCircles(frame, circles, CV_HOUGH_GRADIENT,
-               dp, minDist, param1, param2,
-               minRadius, maxRadius);
+  std::vector<Vec3f> circles2;
+  for (int i=0; i<contours.size(); i++)
+  {
+    // contours[i] is the current set of points
+    // NOTE: do a check for >= 3 elements
+    // first minimize the algebraic distance, this does not provide a clean,
+    // accurate circle, but it provides a ballpark estimate to start with
+
+    // populate B, which is data to be multiplied by the circle parameters
+    Mat B =   Mat(contours[i].size(), 4, CV_64F);
+    for (int k=0; k<contours[i].size(); k++)
+    {
+      // for each point, generate the corresponding jacobian entries
+      double x1 = contours[i][k].x;
+      double x2 = contours[i][k].y;
+
+      B.at<double>(k, 0) = pow(x1, 2) + pow(x2, 2);
+      B.at<double>(k, 1) = x1;
+      B.at<double>(k, 2) = x2;
+      B.at<double>(k, 3) = 1;
+    }
+
+    // now we want to solve for the parameters that minimize B*p
+    // minimizing the algebraic error is a matter of finding the right-singular
+    // vector associated with the smallest singular value: the bottom row of vt
+
+    // generate the SVD (*.u, *.w, *.vt are the resulting object members)
+    // and extract the bottom row of vt (same as right column of v)
+    SVD svd_decomp(B);
+    Mat p = svd_decomp.vt.row(svd_decomp.vt.rows - 1);
+
+    // extract parameters, then reparameterize using coordinates and radius
+    double a  = p.at<double>(0, 0);
+    double b1 = p.at<double>(0, 1);
+    double b2 = p.at<double>(0, 2);
+    double c  = p.at<double>(0, 3);
+
+    double x_0 = b1 / (-2 * a);
+    double y_0 = b2 / (-2 * a);
+    double r_0 = sqrt( pow(x_0, 2) + pow(y_0, 2) - c/a );
+
+    // store the initial results
+    circles.push_back(Vec3f(x_0, y_0, r_0));
+
+    // now do gauss-newton to refine circle parameters
+    // now do gauss-newton to refine circle parameters
+    // now do gauss-newton to refine circle parameters
+    // now do gauss-newton to refine circle parameters
+
+    // minimizing the squared error (the difference between global radius and
+    // the distance from the center to a given point) is a matter of solving
+    // a nonlinear least squares which needs to be done in steps using
+    // gauss-newton optimization
+
+    Mat u =   Mat(3, 1, CV_64F);                    // parameters
+    Mat J =   Mat(contours[i].size(), 3, CV_64F);   // jacobian
+    Mat res = Mat(contours[i].size(), 1, CV_64F);   // residuals
+
+    // initialize the u vector with the algebraic distance minimization results
+    u.at<double>(0, 0) = x_0;              // center x guess
+    u.at<double>(1, 0) = y_0;              // center y guess
+    u.at<double>(2, 0) = r_0;              // radius guess
+
+    // alternative method - tends to yeild bad results:
+    //u.at<double>(0, 0) = contours[i][0].x +1; // center x (arbitrary)
+    //u.at<double>(1, 0) = contours[i][0].y +1; // center y (arbitrary)
+    //u.at<double>(2, 0) = 2;                   // radius   (arbitrary)
+
+    // NOTE: change this to a while loop based on an error metric per point
+    for (int j=0; j<10; j++)
+    {
+      // set number of steps forward to fit circle using nonlinear least squares
+      // https://www.emis.de/journals/BBMS/Bulletin/sup962/gander.pdf
+      // https://en.wikipedia.org/wiki/Gauss%E2%80%93Newton_algorithm
+
+      // populate J and residual based on each point
+      for (int k=0; k<contours[i].size(); k++)
+      {
+        // for each point, generate the corresponding jacobian entries
+        double u1 = u.at<double>(0,0);
+        double u2 = u.at<double>(1,0);
+        double x1 = contours[i][k].x;
+        double x2 = contours[i][k].y;
+
+        // calculate the distance to make math easier
+        double dist = sqrt( pow((u1-x1),2) + pow((u2-x2),2) );
+
+        J.at<double>(k, 0) = (u1 - x1)/dist;
+        J.at<double>(k, 1) = (u2 - x2)/dist;
+        J.at<double>(k, 2) = -1;
+
+        // populate the residual - difference between distance and radius
+        res.at<double>(k,0) = dist - u.at<double>(2,0); // residual
+      }
+
+      // find the pseudo inverse
+      Mat J_inv = (J.t()*J).inv()*J.t();
+
+      // gauss-newton step forward
+      u = u - J_inv * res;
+
+      // now have new u, repeat
+    } // end of gauss newton loops
+
+    // current section of points have been fitted, save associated center, r
+    // manage here with circles vector of vectors
 
 
+    circles2.push_back(Vec3f(u.at<double>(0,0),
+                            u.at<double>(1,0),
+                            u.at<double>(2,0)));
+
+
+
+  } // end of cycling through all contours
+
+
+
+  // TODO:
+  // add the color variance check
+  // add cleanup function based on min/max radius, center out of frame
+  // add merge function based on radii and centers, then regeneration
+  //
+
+
+
+
+
+  /*
 
   // clean up circles by checking the color variance at each location
   //namedWindow("The Frame2", CV_WINDOW_AUTOSIZE);
@@ -132,7 +253,7 @@ void SphereDetector::newFrame(Mat frame_in)
     // display the frame
     //imshow("The Frame2", inside);
 
-    /*
+
     // allow user to cycle through frames individually
     int key = waitKey();
     if (key == 110) {
@@ -140,18 +261,20 @@ void SphereDetector::newFrame(Mat frame_in)
     } else if (key == 27) {
       // the 'esc' key was pressed, end application
     }
-    */
+
 
   }
 
 
+  */
 
 
+  // currently the circles that appear white are the alebraic
+  // circles that appear blue are after the geometric
 
-
+  drawCircles(frame, circles);
   cvtColor(frame, frame, CV_GRAY2BGR);
-
-  drawCircles(frame_in, circles2);
+  drawCircles(frame, circles2);
 
   //frame = frame_in;
 
@@ -166,8 +289,12 @@ void SphereDetector::drawCircles(Mat img, std::vector<Vec3f>& circles)
   // cycle through each known circle
   for (int i=0; i<circles.size(); i++)
   {
-    Point2f center = Point2f(circles[i][0],circles[i][1]);
-    circle(img, center, circles[i][2], color, thickness );
+    if (circles[i][0] < img.rows && circles[i][0] > 0 && circles[i][1] < img.cols && circles[i][1] >= 0 && circles[i][2]<200 && circles[i][2]>0)
+    {
+      Point2f center = Point2f(circles[i][0],circles[i][1]);
+      circle(img, center, circles[i][2], color, thickness );
+    }
+
   }
   //std::cout << "worked" << std::endl;
 }
