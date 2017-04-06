@@ -124,15 +124,18 @@ void SphereDetector::newFrame(Mat frame_in)
     u.at<double>(1, 0) = y_0;              // center y guess
     u.at<double>(2, 0) = r_0;              // radius guess
 
-    // alternative method - tends to yeild bad results:
+    // alternative method - tends to yield bad results:
     //u.at<double>(0, 0) = contours[i][0].x +1; // center x (arbitrary)
     //u.at<double>(1, 0) = contours[i][0].y +1; // center y (arbitrary)
     //u.at<double>(2, 0) = 2;                   // radius   (arbitrary)
 
-    // NOTE: change this to a while loop based on an error metric per point
-    for (int j=0; j<10; j++)
+    int j = 0;
+    double error = 1000;
+    while ( j<50 && error > 20)
     {
-      // set number of steps forward to fit circle using nonlinear least squares
+      error = 0;
+      // run for 50 iterations or until the squared error per point reaches
+      // a desired threshold, whichever comes first.
       // https://www.emis.de/journals/BBMS/Bulletin/sup962/gander.pdf
       // https://en.wikipedia.org/wiki/Gauss%E2%80%93Newton_algorithm
 
@@ -154,6 +157,7 @@ void SphereDetector::newFrame(Mat frame_in)
 
         // populate the residual - difference between distance and radius
         res.at<double>(k,0) = dist - u.at<double>(2,0); // residual
+        error += pow(dist - u.at<double>(2,0), 2);
       }
 
       // find the pseudo inverse
@@ -163,7 +167,15 @@ void SphereDetector::newFrame(Mat frame_in)
       u = u - J_inv * res;
 
       // now have new u, repeat
-    } // end of gauss newton loops
+      error = error/contours[i].size();
+      j++;
+    } // end of gauss newton loop
+
+    if (u.at<double>(0,0) > 600 && u.at<double>(0,0) < 1200 && u.at<double>(1,0) > 250 && u.at<double>(1,0) < 800)
+    {
+      std::cout << error << std::endl;
+    }
+
 
     // current section of points have been fitted, save associated center, r
     // manage here with circles vector of vectors
