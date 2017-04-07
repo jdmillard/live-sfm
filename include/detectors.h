@@ -16,6 +16,7 @@ class SphereDetector: public StructureFromMotion
 	  int my_pub_val;
 		void newFrame(cv::Mat frame_in);
 		void drawCircles(cv::Mat img, std::vector<cv::Vec3f>& circles);
+		void circleFitter(std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Vec3f>& circles);
 		cv::Mat frame;
 
 	private:
