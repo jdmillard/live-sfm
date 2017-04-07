@@ -54,17 +54,21 @@ void SphereDetector::newFrame(Mat frame_in)
 
 
   // turn the edges into a series of points
-  std::vector<std::vector<Point>> contours;
+  std::vector<std::vector<Point>> contours, contours2;
   findContours(frame, contours, RETR_LIST, CHAIN_APPROX_NONE);
 
 
   // fit circles to the points
-  std::vector<Vec3f> circles;
+  std::vector<Vec3f> circles, circles2;
+  circleFitter(contours, circles);
+
+  // group similar circles' points together
   int minRadius = 30;
   int maxRadius = 80;
-  circleFitter(contours, circles, minRadius, maxRadius);
+  groupCircles(circles, contours, contours2, minRadius, maxRadius);
 
-
+  // derive circles with new groups
+  circleFitter(contours2, circles2);
 
 
   // TODO:
@@ -161,7 +165,7 @@ void SphereDetector::newFrame(Mat frame_in)
 
   //drawCircles(frame, circles);
   cvtColor(frame, frame, CV_GRAY2BGR);
-  drawCircles(frame, circles);
+  drawCircles(frame, circles2);
 
 
   //frame = frame_in;
@@ -181,8 +185,13 @@ void SphereDetector::drawCircles(Mat img, std::vector<Vec3f>& circles)
   // cycle through each known circle
   for (int i=0; i<circles.size(); i++)
   {
-    Point2f center = Point2f(circles[i][0],circles[i][1]);
-    circle(img, center, circles[i][2], color, thickness );
+
+    if (circles[i][0] > 0 && circles[i][0] < frame.cols &&
+        circles[i][1] > 0 && circles[i][1] < frame.rows)
+    {
+      Point2f center = Point2f(circles[i][0],circles[i][1]);
+      circle(img, center, circles[i][2], color, thickness );
+    }
   }
 }
 
@@ -190,7 +199,7 @@ void SphereDetector::drawCircles(Mat img, std::vector<Vec3f>& circles)
 
 
 
-void SphereDetector::circleFitter(std::vector<std::vector<Point>>& contours, std::vector<Vec3f>& circles, int minRadius, int maxRadius)
+void SphereDetector::circleFitter(std::vector<std::vector<Point>>& contours, std::vector<Vec3f>& circles)
 {
   // the purpose of this method is to robustly and quickly parameterize
   // circles when given groups of points
@@ -304,28 +313,73 @@ void SphereDetector::circleFitter(std::vector<std::vector<Point>>& contours, std
       j++;
     } // end of gauss newton loop
 
-
-
-
     // current section of points have been fitted, save associated center, r
     // manage here with circles vector of vectors
 
-
-    // if center is in the frame and radius is within the limits add the circle
-    if (u.at<double>(0,0) > 0 && u.at<double>(0,0) < frame.cols &&
-        u.at<double>(1,0) > 0 && u.at<double>(1,0) < frame.rows &&
-        u.at<double>(2,0) > minRadius && u.at<double>(2,0) < maxRadius)
-    {
-      circles.push_back(Vec3f(u.at<double>(0,0),
-                              u.at<double>(1,0),
-                              u.at<double>(2,0)));
-    }
-
-
-
-
+    circles.push_back(Vec3f(u.at<double>(0,0),
+                            u.at<double>(1,0),
+                            u.at<double>(2,0)));
   } // end of cycling through all contours
-
-
-
 }
+
+
+
+
+
+void SphereDetector::groupCircles(std::vector<Vec3f>& circles, std::vector<std::vector<Point>>& contours, std::vector<std::vector<Point>>& contours2, int minRadius, int maxRadius)
+{
+  // the purpose of this method is to group sets of points together that
+  // share centerpoints and radii with in a tolerance
+
+  //std::cout << circles.size() << std::endl;
+  //std::cout << contours.size() << std::endl;
+
+  for (int i = 0; i<circles.size(); i++)
+  {
+    // contours[i] is the current set of points
+    // circles[i] is the current set of parameters
+    // and they correspond to eachother
+
+
+    // check to see that current circle is in the image and radii bounds
+    if (circles[i][0] > 0 && circles[i][0] < frame.cols &&
+        circles[i][1] > 0 && circles[i][1] < frame.rows &&
+        circles[i][2] > minRadius && circles[i][2] < maxRadius)
+    {
+      // store the corresponding points;
+      contours2.push_back(contours[i]);
+
+      // cycle through the rest of the entries
+      for (int j = 0; j<circles.size(); j++)
+      {
+        // check criteria
+        double x_diff = circles[i][0] - circles[j][0];
+        double y_diff = circles[i][1] - circles[j][1];
+        double c_dist = sqrt( pow(x_diff, 2) + pow(y_diff, 2));
+        double r_dist = circles[i][2] - circles[j][2];
+
+        if (i!=j && c_dist < 40 && r_dist < 40)
+        {
+          // then add to current batch of points
+          // contours2[contours2.size()-1] // is now the most recent vector of points
+          // and set the radius so high the entry won't be considered again
+
+          // a.insert(a.end(), b.begin(), b.end());
+          int idx = contours2.size()-1;
+          contours2[idx].insert(contours2[idx].end(), contours[j].begin(), contours[j].end());
+
+          // set circle as visited
+          circles[j][2] = 500;
+        }
+      }
+
+      // mark the current circle as visited
+      circles[i][2] = 500;
+    }
+    else
+    {
+      // current image does not satisfy bounds or was already considered
+      circles[i][2] = 500;
+    } // end of initial check
+  } // end of main for loop
+} // end of method
