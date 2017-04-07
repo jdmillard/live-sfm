@@ -60,16 +60,15 @@ void SphereDetector::newFrame(Mat frame_in)
 
   // fit circles to the points
   std::vector<Vec3f> circles;
-  circleFitter(contours, circles);
-
-
+  int minRadius = 30;
+  int maxRadius = 80;
+  circleFitter(contours, circles, minRadius, maxRadius);
 
 
 
 
   // TODO:
   // add the color variance check
-  // add cleanup function based on min/max radius, center out of frame
   // add merge function based on radii and centers, then regeneration
   //
 
@@ -182,23 +181,19 @@ void SphereDetector::drawCircles(Mat img, std::vector<Vec3f>& circles)
   // cycle through each known circle
   for (int i=0; i<circles.size(); i++)
   {
-    if (circles[i][0] < img.rows && circles[i][0] > 0 && circles[i][1] < img.cols && circles[i][1] >= 0 && circles[i][2]<200 && circles[i][2]>0)
-    {
-      Point2f center = Point2f(circles[i][0],circles[i][1]);
-      circle(img, center, circles[i][2], color, thickness );
-    }
-
+    Point2f center = Point2f(circles[i][0],circles[i][1]);
+    circle(img, center, circles[i][2], color, thickness );
   }
-  //std::cout << "worked" << std::endl;
 }
 
 
 
 
 
-void SphereDetector::circleFitter(std::vector<std::vector<Point>>& contours, std::vector<Vec3f>& circles)
+void SphereDetector::circleFitter(std::vector<std::vector<Point>>& contours, std::vector<Vec3f>& circles, int minRadius, int maxRadius)
 {
-
+  // the purpose of this method is to robustly and quickly parameterize
+  // circles when given groups of points
 
   for (int i=0; i<contours.size(); i++)
   {
@@ -316,9 +311,16 @@ void SphereDetector::circleFitter(std::vector<std::vector<Point>>& contours, std
     // manage here with circles vector of vectors
 
 
-    circles.push_back(Vec3f(u.at<double>(0,0),
-                            u.at<double>(1,0),
-                            u.at<double>(2,0)));
+    // if center is in the frame and radius is within the limits add the circle
+    if (u.at<double>(0,0) > 0 && u.at<double>(0,0) < frame.cols &&
+        u.at<double>(1,0) > 0 && u.at<double>(1,0) < frame.rows &&
+        u.at<double>(2,0) > minRadius && u.at<double>(2,0) < maxRadius)
+    {
+      circles.push_back(Vec3f(u.at<double>(0,0),
+                              u.at<double>(1,0),
+                              u.at<double>(2,0)));
+    }
+
 
 
 
