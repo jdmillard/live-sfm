@@ -62,19 +62,24 @@ void SphereDetector::newFrame(Mat frame_in)
   std::vector<Vec3f> circles, circles2;
   circleFitter(contours, circles);
 
+
   // group similar circles' points together
   int minRadius = 30;
   int maxRadius = 80;
   groupCircles(circles, contours, contours2, minRadius, maxRadius);
 
-  // derive circles with new groups
+
+  // derive circles with new point groups
   circleFitter(contours2, circles2);
 
 
+
   // TODO:
-  // add the color variance check
-  // add merge function based on radii and centers, then regeneration
-  //
+  // add the color variance check - see if it can be added early - before grouping to save computation
+  // parameterize the center and radius thresholds for grouping - 40 and 40 below
+  // parameterize the circleFitter thresholds
+  // optimize
+  // see what pre-processing can be cut out to save time
 
 
 
@@ -165,7 +170,7 @@ void SphereDetector::newFrame(Mat frame_in)
 
   //drawCircles(frame, circles);
   cvtColor(frame, frame, CV_GRAY2BGR);
-  drawCircles(frame, circles2);
+  drawCircles(frame_in, circles2);
 
 
   //frame = frame_in;
