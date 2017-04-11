@@ -194,7 +194,7 @@ void SphereDetector::circleFitter(std::vector<std::vector<Point>>& contours, std
 
     int j = 0;
     double error = 1000;
-    while ( j<50 && error > 20)
+    while ( j<10 && error > 20)
     {
       error = 0;
       // run for 50 iterations or until the squared error per point reaches
