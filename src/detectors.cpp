@@ -53,7 +53,7 @@ void SphereDetector::newFrame(Mat frame_in)
   dilate(frame, frame, element);
 
 
-  // turn the edges into a series of points
+  // turn the edges into many series of points
   std::vector<std::vector<Point>> contours, contours2;
   findContours(frame, contours, RETR_LIST, CHAIN_APPROX_NONE);
 
@@ -61,6 +61,10 @@ void SphereDetector::newFrame(Mat frame_in)
   // fit circles to the points
   std::vector<Vec3f> circles, circles2;
   circleFitter(contours, circles);
+
+
+  // check the color variance
+  colorVariance(frame_in, circles);
 
 
   // group similar circles' points together
@@ -75,7 +79,6 @@ void SphereDetector::newFrame(Mat frame_in)
 
 
   // TODO:
-  // add the color variance check - see if it can be added early - before grouping to save computation
   // parameterize the center and radius thresholds for grouping - 40 and 40 below
   // parameterize the circleFitter thresholds
   // optimize
@@ -83,97 +86,10 @@ void SphereDetector::newFrame(Mat frame_in)
 
 
 
-
-
-  /*
-
-  // clean up circles by checking the color variance at each location
-  //namedWindow("The Frame2", CV_WINDOW_AUTOSIZE);
-  //moveWindow("The Frame2", 50, 50);
-
-  std::vector<Vec3f> circles2;
-  for (int i=0; i<circles.size(); i++)
-  {
-    double x = circles[i][0];
-    double y = circles[i][1];
-    double r = circles[i][2];
-    double d = r/sqrt(2);
-
-    // select the square inside the current circle
-    Mat inside(frame_in, Rect(x-d, y-d, 2*d, 2*d));
-
-    // NOTE: need logic to prevent roi occuring outside frame
-    // need a clean way to make it an automatic disqualification
-    // consider making the circle cleanup a dedicated method
-    // further, in the sphere initialization, add roi logic to circles perhaps?
-    // test performance and timing, get lowres video from webcam in demo room
-    // idea: create a mode that allows for circle tuning?
-
-    // look at statistics of the subimage
-    Mat mean, stddev;
-    meanStdDev(inside, mean, stddev);
-
-    // check statistics of each B, G, R
-    // mean of each needs to be > 170
-    // standard deviation of each needs to be < 55
-
-    Mat mean2, stddev2;
-    meanStdDev(stddev, mean2, stddev2);
-
-    //std::cout << "---" << std::endl;
-    //std::cout << "mean" << std::endl;
-    //std::cout << mean << std::endl;
-    //std::cout << "stddev" << std::endl;
-    //std::cout << stddev << std::endl;
-    //std::cout << stddev2.at<double>(0,0) << std::endl;
-
-    double min1, max1;
-    minMaxLoc(mean, &min1, &max1);
-
-    double min2, max2;
-    minMaxLoc(stddev, &min2, &max2);
-
-    int rbg_thresh    = 170; // all rgb averages must be higher than this
-    int stddev_thresh = 60;  // all rbg stddevs must be lower than this
-    int stddev2_thresh= 3;   // stddev of stddev must be lower than this
-
-    // there will be misses and false positives... the sfm must accomodate this
-
-    if ((min1 > rbg_thresh) && (max2 < stddev_thresh) && (stddev2.at<double>(0,0) < stddev2_thresh))
-    {
-      // NOTE: cleanup variable names, comments, and overall structure
-      //std::cout << "SPHERE SPHERE SPHERE SPHERE SPHERE" << std::endl;
-      circles2.push_back(circles[i]);
-    }
-
-    // display the frame
-    //imshow("The Frame2", inside);
-
-
-    // allow user to cycle through frames individually
-    int key = waitKey();
-    if (key == 110) {
-      // the 'n' (next) key was pressed
-    } else if (key == 27) {
-      // the 'esc' key was pressed, end application
-    }
-
-
-  }
-
-
-  */
-
-
-  // currently the circles that appear white are the alebraic
-  // circles that appear blue are after the geometric
-
-  //drawCircles(frame, circles);
   cvtColor(frame, frame, CV_GRAY2BGR);
   drawCircles(frame_in, circles2);
 
 
-  //frame = frame_in;
 
 }
 
@@ -387,4 +303,101 @@ void SphereDetector::groupCircles(std::vector<Vec3f>& circles, std::vector<std::
       circles[i][2] = 500;
     } // end of initial check
   } // end of main for loop
+} // end of method
+
+
+
+
+
+void SphereDetector::colorVariance(Mat frame_in, std::vector<Vec3f>& circles)
+{
+  // the purpose of this method is to check the color variance of the inside
+  // of each circle to rule out false circles
+
+  // clean up circles by checking the color variance at each location
+  //namedWindow("The Frame2", CV_WINDOW_AUTOSIZE);
+  //moveWindow("The Frame2", 50, 50);
+
+  for (int i=0; i<circles.size(); i++)
+  {
+    double x = circles[i][0];
+    double y = circles[i][1];
+    double r = circles[i][2];
+    double d = r/sqrt(2);
+
+
+    if (x-d < 0 || x+d > frame_in.cols || y-d < 0 || y+d > frame_in.rows)
+    {
+      // circle lives outside the frame, disqualify the circle
+      circles[i][2] = 500;
+    }
+    else
+    {
+      // circle position is good, perform variance check
+
+      // select the square inside the current circle
+      Mat inside(frame_in, Rect(x-d, y-d, 2*d, 2*d));
+
+      // look at statistics of the subimage
+      Mat mean, stddev;
+      meanStdDev(inside, mean, stddev);
+
+      // check statistics of each B, G, R
+      // mean of each needs to be > 170
+      // standard deviation of each needs to be < 55
+
+      Mat mean2, stddev2;
+      meanStdDev(stddev, mean2, stddev2);
+
+      //std::cout << "---" << std::endl;
+      //std::cout << "mean" << std::endl;
+      //std::cout << mean << std::endl;
+      //std::cout << "stddev" << std::endl;
+      //std::cout << stddev << std::endl;
+      //std::cout << stddev2.at<double>(0,0) << std::endl;
+
+      double min1, max1;
+      minMaxLoc(mean, &min1, &max1);
+
+      double min2, max2;
+      minMaxLoc(stddev, &min2, &max2);
+
+      int rbg_thresh    = 170; // all rgb averages must be higher than this
+      int stddev_thresh = 60;  // all rbg stddevs must be lower than this
+      int stddev2_thresh= 3;   // stddev of stddev must be lower than this
+
+      if ((min1 > rbg_thresh) && (max2 < stddev_thresh) && (stddev2.at<double>(0,0) < stddev2_thresh))
+      {
+        // NOTE: cleanup variable names, comments, and overall structure
+        //std::cout << "SPHERE SPHERE SPHERE SPHERE SPHERE" << std::endl;
+        //std::cout << "good circle" << std::endl;
+      }
+      else
+      {
+        // disqualify the current circle
+        circles[i][2] = 500;
+        //std::cout << "bad circle" << std::endl;
+      }
+
+      // display the frame
+      //imshow("The Frame2", inside);
+
+      /*
+      // allow user to cycle through frames individually
+      int key = waitKey();
+      if (key == 110) {
+        // the 'n' (next) key was pressed
+      } else if (key == 27) {
+        // the 'esc' key was pressed, end application
+      }
+      */
+
+    } // end of circle edge check
+
+  } // end of loop through circles
+
+
+
+
+
 } // end of method
