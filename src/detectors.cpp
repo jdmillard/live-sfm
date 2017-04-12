@@ -16,7 +16,7 @@ SphereDetector::SphereDetector(int in_var)
 {
   sep = in_var;
 
-  // any other initialization steps
+  // any other initialization steps?
 
 }
 
@@ -48,7 +48,7 @@ void SphereDetector::newFrame(Mat frame_in)
     if (inside > 2)
     {
       init = true;
-      std::cout << "algorithm initialized" << std::endl;
+      std::cout << "spheres found, algorithm initialized" << std::endl;
     }
     else
     {
@@ -58,12 +58,15 @@ void SphereDetector::newFrame(Mat frame_in)
   else
   {
     // algorithm has been initialized; run normal course
-    std::cout << "normal operation" << std::endl;
+    featureTracker(frame_in);
     // track features to current frame
     // if keyframe
-    //   find transform back to starting position using standard surviving features
+    //   find transform back to starting position using standard surviving features (features_all) use ball size to tune translation
     //   get sets of measurements using other nearby keyframes (in current frame)
-    //   transform them back to original frame and do least squares update
+    //   transform measurements them back to original frame
+    //   do least squares update on ball estimates
+
+    // (all this doesn't consider false and missing measurements)
 
 
 

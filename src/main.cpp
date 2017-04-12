@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   namedWindow("The Frame", CV_WINDOW_AUTOSIZE);
   moveWindow("The Frame", 50, 50);
 
-
+  // the value going in is the frame separation between keyframes
   SphereDetector sfm(5);
 
 

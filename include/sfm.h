@@ -6,11 +6,14 @@ class StructureFromMotion
 {
 	public:
 		void newFrame(cv::Mat frame_in);
+		void featureTracker(cv::Mat frame_in);
 
 		bool init = false;
 		int idx; // frame index
 		int sep; // keyframe separation
 
+		std::vector<cv::Point2f>							features_cur;
+		std::vector<std::vector<cv::Point2f>> features_all;
 
 	  int my_pub_val_base;
 

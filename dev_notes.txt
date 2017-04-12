@@ -5,22 +5,23 @@ long-term important concepts ought to be in the README.md
 features are to be tracked across (every?) frame.
 every N frames will be a keyframe with a transformation back to the original
 a given keyframe can previous and following (N-1)*2 images to find (N-1)*2 measurements
-of all valid balls in frame  - which are then transformed back into 
+of all valid balls in frame  - which are then transformed back into original
+frame then least squares (perhaps weighted by inverse distance of transformation)
+
+going across each frame, track features across each one, eliminating bad ones
+when a keyframe idx is reached:
+-find sphere locations and save with keyframe idx
+-generate rotation/translation to nearby keyframes
+-find multiple sets of measurements in current keyframe coordinates of in-frame spheres
+-generate the rotation/translation back to original
 
 
-front end to find the points of interest for a current frame
-should be replaceable
 
-get the transformation using features associated with respective frames
-get 3d locations of points relative to eachother
-feature generation and matching ought to be replaceable
-
-need to associate points between frames
-perhaps cycle through each possible association, use disparity, and look at distances, associate based on distances... what if you have not 3d positions to associate with? there must be an alternative method to look at image-frame distances from very recent frames.
-
-update the distances. each frame will produce the distances relative to that camera, these can be converted to be relative to each-other with one of them being 0.0. so ultimately, they are stored relative to eachother
+need to associate sphere points between frames
+use roi?
+use disparity and 3d positions?
+use combination?
 
 
 
 need a way to trigger a reset if the balls move
-need a smart way to manage feature tracking across many frames, and updating this, along with performing disparity estimates from every combination of frames.... needs more thougths
