@@ -7,6 +7,9 @@ class StructureFromMotion
 	public:
 		void newFrame(cv::Mat frame_in);
 		void featureTracker(cv::Mat frame_in);
+		void loadCalibration();
+
+		cv::Mat intrinsic, distortion;
 
 		bool init = false;
 		int idx; // frame index
