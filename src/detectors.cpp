@@ -54,19 +54,20 @@ void SphereDetector::newFrame(Mat frame_in)
     {
       std::cout << "searching for spheres in image center" << std::endl;
     }
-
-
   }
   else
   {
-    // run normal course of algorithm
+    // algorithm has been initialized; run normal course
+    std::cout << "normal operation" << std::endl;
+    // track features to current frame
+    // if keyframe
+    //   find transform back to starting position using standard surviving features
+    //   get sets of measurements using other nearby keyframes (in current frame)
+    //   transform them back to original frame and do least squares update
 
 
-    
-    std::cout << "algorithm initialized" << std::endl;
-    // track features
-    // determine if this is a keyframe
-    // when all operations are complete, incremend idx for next frame
+
+    // when all operations are complete, increment idx for next frame
   }
 
 
