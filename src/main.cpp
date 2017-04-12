@@ -39,12 +39,7 @@ int main(int argc, char **argv)
   moveWindow("The Frame", 50, 50);
 
 
-  SphereDetector sfm(13);
-
-  std::cout << sfm.my_pub_val << std::endl;
-  std::cout << sfm.my_pub_valy << std::endl;
-  std::cout << sfm.getVal() << std::endl;
-  std::cout << sfm.getValy() << std::endl;
+  SphereDetector sfm(5);
 
 
   Mat frame;

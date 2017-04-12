@@ -14,17 +14,29 @@ format.
 
 SphereDetector::SphereDetector(int in_var)
 {
+  idx = 0;
+  sep = in_var;
+
+
   my_pri_val = in_var;
   my_pub_val = in_var;
-  setValy(in_var);
+
 }
 
-int SphereDetector::getVal()
-{
-  return my_pri_val;
-}
 
 void SphereDetector::newFrame(Mat frame_in)
+{
+  // here perform logic based on class values to determine which are keyframes
+  // it would be nice
+  std::cout << "hey_derived" << std::endl;
+  std::cout << sep << std::endl;
+
+  // so are the frame ids to be managed internally?
+
+}
+
+
+void SphereDetector::detectSpheres(Mat frame_in)
 {
 
   // perform image processing required to locate spheres in the current frame

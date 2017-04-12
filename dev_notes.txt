@@ -2,6 +2,12 @@ EVENTUALLY REMOVE THIS FILE, it's for half-baked development ideas,
 long-term important concepts ought to be in the README.md
 
 
+features are to be tracked across (every?) frame.
+every N frames will be a keyframe with a transformation back to the original
+a given keyframe can previous and following (N-1)*2 images to find (N-1)*2 measurements
+of all valid balls in frame  - which are then transformed back into 
+
+
 front end to find the points of interest for a current frame
 should be replaceable
 
