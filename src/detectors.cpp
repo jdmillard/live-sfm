@@ -61,8 +61,9 @@ void SphereDetector::newFrame(Mat frame_in)
     featureTracker(frame_in);
     // track features to current frame
     // if keyframe
+    //   do an overall outlier cleanup between beginning and now
     //   find transform back to starting position using standard surviving features (features_all) use ball size to tune translation
-    //   get sets of measurements using other nearby keyframes (in current frame)
+    //   find circles then get sets of measurements using other nearby keyframes' circle measurements (in current frame)
     //   transform measurements them back to original frame
     //   do least squares update on ball estimates
 
