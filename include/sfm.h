@@ -6,13 +6,15 @@ class StructureFromMotion
 {
 	public:
 		void newFrame(cv::Mat frame_in);
+
+		bool init = false;
 		int idx; // frame index
 		int sep; // keyframe separation
 
 
-	  int my_pub_valy;
+	  int my_pub_val_base;
 
 	private:
-		int my_pri_valy;
+		int my_pri_val_base;
 
 };

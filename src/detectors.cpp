@@ -14,29 +14,66 @@ format.
 
 SphereDetector::SphereDetector(int in_var)
 {
-  idx = 0;
   sep = in_var;
 
-
-  my_pri_val = in_var;
-  my_pub_val = in_var;
+  // any other initialization steps
 
 }
 
 
 void SphereDetector::newFrame(Mat frame_in)
 {
-  // here perform logic based on class values to determine which are keyframes
-  // it would be nice
-  std::cout << "hey_derived" << std::endl;
-  std::cout << sep << std::endl;
+  if (!init)
+  {
+    // algorithm has not yet been initialized, look to see if spheres are found
+    // in the middle quarter of the image, if not keep looking
 
-  // so are the frame ids to be managed internally?
+    std::vector<Vec3f> circles;
+    circles = detectSpheres(frame_in);
+
+    int inside = 0;
+    int left = frame_in.cols/2 - frame_in.cols/4;
+    int right = frame_in.cols/2 + frame_in.cols/4;
+    int top = frame_in.rows/2 - frame_in.rows/4;
+    int bottom = frame_in.rows/2 + frame_in.rows/4;
+
+    for (int i=0; i<circles.size(); i++)
+    {
+      if (circles[i][0] > left && circles[i][0] < right && circles[i][1] > top && circles[i][1] < bottom)
+      {
+        inside++;
+      }
+    }
+
+    if (inside > 2)
+    {
+      init = true;
+      std::cout << "algorithm initialized" << std::endl;
+    }
+    else
+    {
+      std::cout << "searching for spheres in image center" << std::endl;
+    }
+
+
+  }
+  else
+  {
+    // run normal course of algorithm
+
+
+    
+    std::cout << "algorithm initialized" << std::endl;
+    // track features
+    // determine if this is a keyframe
+    // when all operations are complete, incremend idx for next frame
+  }
+
 
 }
 
 
-void SphereDetector::detectSpheres(Mat frame_in)
+std::vector<Vec3f> SphereDetector::detectSpheres(Mat frame_in)
 {
 
   // perform image processing required to locate spheres in the current frame
@@ -100,6 +137,8 @@ void SphereDetector::detectSpheres(Mat frame_in)
 
   cvtColor(frame, frame, CV_GRAY2BGR);
   drawCircles(frame_in, circles2);
+
+  return circles2;
 
 
 
