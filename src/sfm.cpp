@@ -35,11 +35,7 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     // load calibration
     loadCalibration();
 
-    // convert to intensity image
-    Mat frame_gray;
-    cvtColor(frame_in, frame_gray, CV_BGR2GRAY);
-
-
+    // find goodFeaturesToTrack
     int max_points = 1000;
     double quality = 0.01;
     double min_dist = 10;
@@ -47,25 +43,33 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     int blockSize = 3;
     bool useHarris = false;
     double k = 0.04;
-    goodFeaturesToTrack(frame_gray, features_old, max_points, quality, min_dist, mask, blockSize, useHarris, k);
+    goodFeaturesToTrack(frame_gray, features_new, max_points, quality, min_dist, mask, blockSize, useHarris, k);
 
-    drawFeatures(frame_in, features_old);
+    // draw the features
+    drawFeatures(frame_in, features_new);
+
+    // this is the first iteration
+    idx = 0;
+
+    // start saving features
+    features_all.push_back(features_new);
+
+    // update the feature vectors for next iteration
+    features_old.clear();
+    features_old = features_new;
+    features_new.clear();
 
     // remember the last iteration's frame
     frame_gray_old = frame_gray.clone();
-
-    // REMEMBER TO PUSH BACK ON features_all !!!!!!!!!!!!!!!!!!!!!!!!
   }
   else
   {
-    // features have been initialized, perform tracking, remove outliers (from all feature sets of all idx)
-    // look into the "keep" command with masking
+    // features have been initialized, perform tracking
 
     // template matching
     int d_wind = 81; // window dimension
     int d_temp = 31; // template dimension
 
-    // rename features_old to old
     std::vector<Point2f> features_new;
     for (int i=0; i<features_old.size(); i++)
     {
@@ -121,13 +125,25 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     } // end of looping through features
 
 
+    // draw the features
     drawFeatures(frame_in, features_new);
+
+    // saving the features
+    idx++;
+    features_all.push_back(features_new);
+
+    // here use mask to clean up feature vectors (first and most recent)
+    // make mask cleanup function
+    // use findFundamentalMatrix to chop off outliers
+
+    // update the feature vectors for next iteration
     features_old.clear();
     features_old = features_new;
+    features_new.clear();
 
+    // remember the last iteration's frame
     frame_gray_old = frame_gray.clone();
 
-    // REMEMBER TO PUSH BACK ON features_all !!!!!!!!!!!!!!!!!!!!!!!!
 
   } // end of if check
 

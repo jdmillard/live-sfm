@@ -341,8 +341,8 @@ void SphereDetector::groupCircles(std::vector<Vec3f>& circles, std::vector<std::
           // and set the radius so high the entry won't be considered again
 
           // a.insert(a.end(), b.begin(), b.end());
-          int idx = contours2.size()-1;
-          contours2[idx].insert(contours2[idx].end(), contours[j].begin(), contours[j].end());
+          int idx2 = contours2.size()-1;
+          contours2[idx2].insert(contours2[idx2].end(), contours[j].begin(), contours[j].end());
 
           // set circle as visited
           circles[j][2] = 500;

@@ -17,6 +17,7 @@ class StructureFromMotion
 
 		std::vector<uchar> 										features_mask;
 		std::vector<cv::Point2f>							features_old;
+		std::vector<cv::Point2f>							features_new;
 		std::vector<std::vector<cv::Point2f>> features_all;
 
 		cv::Mat frame_gray_old;
