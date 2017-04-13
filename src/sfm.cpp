@@ -30,7 +30,6 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     int blockSize = 3;
     bool useHarris = false;
     double k = 0.04;
-    std::cout << "here" << std::endl;
     goodFeaturesToTrack(frame_gray, features_cur, max_points, quality, min_dist, mask, blockSize, useHarris, k);
 
     drawFeatures(frame_in, features_cur);
@@ -48,15 +47,14 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     // template matching
     int dim_win = 81;
     int dim_tem = 31;
-    // delcare a features_new
+
     // rename features_cur to old
     std::vector<Point2f> features_new;
-    for (int k=0; k<features_cur.size(); k++)
+    for (int i=0; i<features_cur.size(); i++)
     {
-      std::cout << "---" << std::endl;
-      std::cout << features_cur[k] << std::endl;
-      // create a window around features_cur[k], which is Point2f
-      int x1 = features_cur[k].x - dim_win/2;
+
+      // create a window around from current image for the current feature
+      int x1 = features_cur[i].x - (dim_win-1)/2;
       if (x1 < 0)
       {
         x1 = 0;
@@ -65,7 +63,7 @@ void StructureFromMotion::featureTracker(Mat frame_in)
       {
         x1 = frame_in.cols - dim_win;
       }
-      int y1 = features_cur[k].y - dim_win/2;
+      int y1 = features_cur[i].y - (dim_win-1)/2;
       if (y1 < 0)
       {
         y1 = 0;
@@ -77,28 +75,24 @@ void StructureFromMotion::featureTracker(Mat frame_in)
       // window established in next image
       Mat win = frame_gray(Rect(x1, y1, dim_win, dim_win));
 
-      // create a template around features_cur[k], which is Point2f
-      int x2 = features_cur[k].x - dim_tem/2;
+      // create a template around features_cur[i], which is Point2f
+      int x2 = features_cur[i].x - (dim_tem-1)/2;
       if (x2 < 0)
       {
         x2 = 0;
-        features_cur[k].x = x2 + dim_tem/2;
       }
       if ((x2+dim_tem)>frame_in.cols)
       {
         x2 = frame_in.cols - dim_tem;
-        features_cur[k].x = x2 + dim_tem/2;
       }
-      int y2 = features_cur[k].y - dim_tem/2;
+      int y2 = features_cur[i].y - (dim_tem-1)/2;
       if (y2 < 0)
       {
         y2 = 0;
-        features_cur[k].y = y2 + dim_tem/2;
       }
       if ((y2+dim_tem)>frame_in.rows)
       {
         y2 = frame_in.rows - dim_tem;
-        features_cur[k].y = y2 + dim_tem/2;
       }
 
       // window established in next image
@@ -107,7 +101,6 @@ void StructureFromMotion::featureTracker(Mat frame_in)
       // match the current template of image 1 to window of image 2
       Mat output;
       matchTemplate(win, tem, output, TM_CCORR_NORMED);
-      std::cout << output.size() << std::endl;
 
       // normalize the intensity output
       normalize(output, output, 0, 1, NORM_MINMAX,  -1, Mat());
@@ -115,12 +108,11 @@ void StructureFromMotion::featureTracker(Mat frame_in)
       // locate the position of highest correlation
       Point max_point;
       minMaxLoc(output, 0, 0, 0, &max_point, Mat());
-      std::cout << max_point << std::endl;
 
       // represent the max point in original image coordinates
       max_point.x = max_point.x + dim_tem/2 + x1;
       max_point.y = max_point.y + dim_tem/2 + y1;
-      std::cout << max_point << std::endl;
+
       features_new.push_back(max_point);
 
     } // end of looping through features
