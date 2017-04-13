@@ -5,16 +5,11 @@ using namespace cv;
 
 void StructureFromMotion::loadCalibration()
 {
-  std::cout << "load calibration here" << std::endl;
-
   // load saved calibration
   FileStorage fsr("../calibration/calibration.xml", FileStorage::READ);
   fsr["intrinsic"] >> intrinsic;
   fsr["distortion"] >> distortion;
   fsr.release();
-
-  std::cout << distortion << std::endl;
-
 }
 
 void StructureFromMotion::newFrame(Mat frame_in)
@@ -67,31 +62,32 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     // look into the "keep" command with masking
 
     // template matching
-    int dim_win = 81;
-    int dim_tem = 31;
+    int d_wind = 81; // window dimension
+    int d_temp = 31; // template dimension
 
     // rename features_cur to old
     std::vector<Point2f> features_new;
+    std::vector<bool>    mask;
     for (int i=0; i<features_cur.size(); i++)
     {
 
       // create a window from current image for the current feature
-      int x1 = features_cur[i].x - (dim_win-1)/2;
+      int x1 = features_cur[i].x - (d_wind-1)/2;
       x1 = std::max(x1, 0);
-      x1 = std::min(x1, frame_in.cols-dim_win);
-      int y1 = features_cur[i].y - (dim_win-1)/2;
+      x1 = std::min(x1, frame_in.cols-d_wind);
+      int y1 = features_cur[i].y - (d_wind-1)/2;
       y1 = std::max(y1, 0);
-      y1 = std::min(y1, frame_in.rows-dim_win);
-      Mat win = frame_gray(Rect(x1, y1, dim_win, dim_win));
+      y1 = std::min(y1, frame_in.rows-d_wind);
+      Mat win = frame_gray(Rect(x1, y1, d_wind, d_wind));
 
       // create a template from previous image for the current feature
-      int x2 = features_cur[i].x - (dim_tem-1)/2;
+      int x2 = features_cur[i].x - (d_temp-1)/2;
       x2 = std::max(x2, 0);
-      x2 = std::min(x2, frame_in.cols-dim_tem);
-      int y2 = features_cur[i].y - (dim_tem-1)/2;
+      x2 = std::min(x2, frame_in.cols-d_temp);
+      int y2 = features_cur[i].y - (d_temp-1)/2;
       y2 = std::max(y2, 0);
-      y2 = std::min(y2, frame_in.rows-dim_tem);
-      Mat tem = frame_gray_old(Rect(x2, y2, dim_tem, dim_tem));
+      y2 = std::min(y2, frame_in.rows-d_temp);
+      Mat tem = frame_gray_old(Rect(x2, y2, d_temp, d_temp));
 
       // THIS ALLOWS OFF-CENTER FEATURES!!! which makes the max_point logic
       // wrong lines 89 and 90
@@ -108,8 +104,8 @@ void StructureFromMotion::featureTracker(Mat frame_in)
       minMaxLoc(output, 0, 0, 0, &max_point, Mat());
 
       // represent the max point in original image coordinates
-      max_point.x = max_point.x + dim_tem/2 + x1;
-      max_point.y = max_point.y + dim_tem/2 + y1;
+      max_point.x = max_point.x + d_temp/2 + x1;
+      max_point.y = max_point.y + d_temp/2 + y1;
 
       features_new.push_back(max_point);
 
