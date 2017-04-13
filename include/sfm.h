@@ -7,6 +7,7 @@ class StructureFromMotion
 	public:
 		void newFrame(cv::Mat frame_in);
 		void featureTracker(cv::Mat frame_in);
+		void drawFeatures(cv::Mat img, std::vector<cv::Point2f>& features);
 
 		bool init = false;
 		int idx; // frame index
@@ -14,6 +15,9 @@ class StructureFromMotion
 
 		std::vector<cv::Point2f>							features_cur;
 		std::vector<std::vector<cv::Point2f>> features_all;
+
+		cv::Mat frame_gray_old;
+
 
 	  int my_pub_val_base;
 

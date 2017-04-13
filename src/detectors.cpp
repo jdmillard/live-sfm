@@ -122,10 +122,9 @@ std::vector<Vec3f> SphereDetector::detectSpheres(Mat frame_in)
 
 
   // group similar circles' points together
-  int minRadius = 30;
+  int minRadius = 20;
   int maxRadius = 80;
   groupCircles(circles, contours, contours2, minRadius, maxRadius);
-
 
   // derive circles with new point groups
   circleFitter(contours2, circles2);

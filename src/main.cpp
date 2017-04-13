@@ -25,7 +25,7 @@ int main(int argc, char **argv)
   if (from_recorded)
   {
     // use frames from a pre-recorded video
-    std::string filename = "../images/vid.mp4";
+    std::string filename = "../images/vid2.webm";
     std::cout << filename << std::endl;
     video.open(filename);
   }
