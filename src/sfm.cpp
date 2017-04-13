@@ -27,7 +27,7 @@ void StructureFromMotion::featureTracker(Mat frame_in)
   cvtColor(frame_in, frame_gray, CV_BGR2GRAY);
 
 
-  if (features_cur.size()==0)
+  if (features_old.size()==0)
   {
     // no features have been initialized
     // populate the feature vector
@@ -47,9 +47,9 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     int blockSize = 3;
     bool useHarris = false;
     double k = 0.04;
-    goodFeaturesToTrack(frame_gray, features_cur, max_points, quality, min_dist, mask, blockSize, useHarris, k);
+    goodFeaturesToTrack(frame_gray, features_old, max_points, quality, min_dist, mask, blockSize, useHarris, k);
 
-    drawFeatures(frame_in, features_cur);
+    drawFeatures(frame_in, features_old);
 
     // remember the last iteration's frame
     frame_gray_old = frame_gray.clone();
@@ -65,30 +65,30 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     int d_wind = 81; // window dimension
     int d_temp = 31; // template dimension
 
-    // rename features_cur to old
+    // rename features_old to old
     std::vector<Point2f> features_new;
     std::vector<bool>    mask;
-    for (int i=0; i<features_cur.size(); i++)
+    for (int i=0; i<features_old.size(); i++)
     {
 
       // create a window from current image for the current feature
-      int x1 = features_cur[i].x - (d_wind-1)/2;
+      int x1 = features_old[i].x - (d_wind-1)/2;
       x1 = std::max(x1, 0);
       x1 = std::min(x1, frame_in.cols-d_wind);
-      int y1 = features_cur[i].y - (d_wind-1)/2;
+      int y1 = features_old[i].y - (d_wind-1)/2;
       y1 = std::max(y1, 0);
       y1 = std::min(y1, frame_in.rows-d_wind);
       Mat win = frame_gray(Rect(x1, y1, d_wind, d_wind));
 
       // create a template from previous image for the current feature
-      int x2 = features_cur[i].x - (d_temp-1)/2;
-      int y2 = features_cur[i].y - (d_temp-1)/2;
+      int x2 = features_old[i].x - (d_temp-1)/2;
+      int y2 = features_old[i].y - (d_temp-1)/2;
       if (x2 < 0 || x2 > frame_in.cols-d_temp || y2 < 0 || y2 > frame_in.rows-d_temp)
       {
         // template doesn't fit in frame, it's too close to the edge
         // mark it as a bad feature and enter a false location
         mask.push_back(false);
-        features_new.push_back(features_cur[i]);
+        features_new.push_back(features_old[i]);
       }
       else
       {
@@ -123,8 +123,8 @@ void StructureFromMotion::featureTracker(Mat frame_in)
 
 
     drawFeatures(frame_in, features_new);
-    features_cur.clear();
-    features_cur = features_new;
+    features_old.clear();
+    features_old = features_new;
 
     frame_gray_old = frame_gray.clone();
 
