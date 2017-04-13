@@ -82,32 +82,42 @@ void StructureFromMotion::featureTracker(Mat frame_in)
 
       // create a template from previous image for the current feature
       int x2 = features_cur[i].x - (d_temp-1)/2;
-      x2 = std::max(x2, 0);
-      x2 = std::min(x2, frame_in.cols-d_temp);
       int y2 = features_cur[i].y - (d_temp-1)/2;
-      y2 = std::max(y2, 0);
-      y2 = std::min(y2, frame_in.rows-d_temp);
-      Mat tem = frame_gray_old(Rect(x2, y2, d_temp, d_temp));
+      if (x2 < 0 || x2 > frame_in.cols-d_temp || y2 < 0 || y2 > frame_in.rows-d_temp)
+      {
+        // template doesn't fit in frame, it's too close to the edge
+        // mark it as a bad feature and enter a false location
+        mask.push_back(false);
+        features_new.push_back(features_cur[i]);
+      }
+      else
+      {
+        // feature location is good, not too close to the edge
+        // mark it as a good feature and perform template matching
+        mask.push_back(true);
 
-      // THIS ALLOWS OFF-CENTER FEATURES!!! which makes the max_point logic
-      // wrong lines 89 and 90
+        // generate good template
+        Mat tem = frame_gray_old(Rect(x2, y2, d_temp, d_temp));
 
-      // match the current template of image 1 to window of image 2
-      Mat output;
-      matchTemplate(win, tem, output, TM_CCORR_NORMED);
+        // match the current template and window
+        Mat output;
+        matchTemplate(win, tem, output, TM_CCORR_NORMED);
 
-      // normalize the intensity output
-      normalize(output, output, 0, 1, NORM_MINMAX,  -1, Mat());
+        // normalize the intensity output
+        normalize(output, output, 0, 1, NORM_MINMAX,  -1, Mat());
 
-      // locate the position of highest correlation
-      Point max_point;
-      minMaxLoc(output, 0, 0, 0, &max_point, Mat());
+        // locate the position of highest correlation
+        Point max_point;
+        minMaxLoc(output, 0, 0, 0, &max_point, Mat());
 
-      // represent the max point in original image coordinates
-      max_point.x = max_point.x + d_temp/2 + x1;
-      max_point.y = max_point.y + d_temp/2 + y1;
+        // represent the max point in original image coordinates
+        max_point.x = max_point.x + d_temp/2 + x1;
+        max_point.y = max_point.y + d_temp/2 + y1;
 
-      features_new.push_back(max_point);
+        features_new.push_back(max_point);
+      }
+
+
 
     } // end of looping through features
 
