@@ -25,3 +25,45 @@ use combination?
 
 
 need a way to trigger a reset if the balls move
+
+
+------------------------------------------------------
+make gist for ros camera calibration:
+
+use this node:
+http://wiki.ros.org/camera_calibration
+
+install this to make camera topic:
+sudo apt install ros-kinetic-cv-camera
+rospack profile (to update packages)
+
+install this for video errors:
+sudo apt-get install v4l2ucp
+Create environment variable: `export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libv4l/v4l2convert.so` (always run for new terminals or add to .bashrc)
+        * This [thread](https://www.linuxquestions.org/questions/programming-9/opencv-pixel-format-of-incoming-image-is-unsupported-by-opencv-842801/) was helpful, but my *.so path was different
+        * To find your proper *.so path, use `locate v4l | grep -v 0 | grep convert`
+        * Running `$ v4l2ucp` will open a configuration gui, but I didn't need it.
+
+
+
+----------------------------------------------------
+
+raw results from the ros calibration of Parker's webcam
+
+camera matrix
+627.380450 0.000000 307.072057
+0.000000 602.865646 247.835421
+0.000000 0.000000 1.000000
+
+distortion
+0.042512 -0.062159 0.000939 -0.001256 0.000000
+
+rectification
+1.000000 0.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 0.000000 1.000000
+
+projection
+632.245667 0.000000 306.360233 0.000000
+0.000000 607.844910 248.246505 0.000000
+0.000000 0.000000 1.000000 0.000000

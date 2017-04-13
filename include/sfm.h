@@ -8,6 +8,8 @@ class StructureFromMotion
 		void newFrame(cv::Mat frame_in);
 		void featureTracker(cv::Mat frame_in);
 		void drawFeatures(cv::Mat img, std::vector<cv::Point2f>& features);
+		void loadCalibration();
+		cv::Mat intrinsic, distortion;
 
 		bool init = false;
 		int idx; // frame index
