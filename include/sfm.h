@@ -15,6 +15,7 @@ class StructureFromMotion
 		int idx; // frame index
 		int sep; // keyframe separation
 
+		std::vector<uchar> 										features_mask;
 		std::vector<cv::Point2f>							features_old;
 		std::vector<std::vector<cv::Point2f>> features_all;
 

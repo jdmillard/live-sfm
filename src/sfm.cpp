@@ -67,7 +67,6 @@ void StructureFromMotion::featureTracker(Mat frame_in)
 
     // rename features_old to old
     std::vector<Point2f> features_new;
-    std::vector<bool>    mask;
     for (int i=0; i<features_old.size(); i++)
     {
 
@@ -87,14 +86,14 @@ void StructureFromMotion::featureTracker(Mat frame_in)
       {
         // template doesn't fit in frame, it's too close to the edge
         // mark it as a bad feature and enter a false location
-        mask.push_back(false);
+        features_mask.push_back(0);
         features_new.push_back(features_old[i]);
       }
       else
       {
         // feature location is good, not too close to the edge
         // mark it as a good feature and perform template matching
-        mask.push_back(true);
+        features_mask.push_back(1);
 
         // generate good template
         Mat tem = frame_gray_old(Rect(x2, y2, d_temp, d_temp));
