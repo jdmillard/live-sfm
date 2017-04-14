@@ -45,9 +45,6 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     double k = 0.04;
     goodFeaturesToTrack(frame_gray, features_new, max_points, quality, min_dist, mask, blockSize, useHarris, k);
 
-    // draw the features
-    drawFeatures(frame_in, features_new);
-
     // this is the first iteration
     idx = 0;
 
@@ -140,9 +137,6 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     double confidence = 0.95; // confidence of correct F matrix (0-1)
     Mat F = findFundamentalMat(features_all[0], features_new, FM_RANSAC, ep_dist, confidence, features_mask);
     cleanFeatures();
-
-    // draw the features
-    drawFeatures(frame_in, features_new);
 
     // save the features
     idx++;

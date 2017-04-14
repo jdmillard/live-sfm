@@ -59,6 +59,8 @@ void SphereDetector::newFrame(Mat frame_in)
   {
     // algorithm has been initialized; run normal course
     featureTracker(frame_in);
+    detectSpheres(frame_in);
+    drawFeatures(frame_in, features_old);
     // track features to current frame
     // if keyframe
     //   do an overall outlier cleanup between beginning and now
