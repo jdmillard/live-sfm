@@ -70,7 +70,6 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     int d_wind = 81; // window dimension
     int d_temp = 31; // template dimension
 
-    std::vector<Point2f> features_new;
     for (int i=0; i<features_old.size(); i++)
     {
 
@@ -92,6 +91,7 @@ void StructureFromMotion::featureTracker(Mat frame_in)
         // mark it as a bad feature and enter a false location
         features_mask.push_back(0);
         features_new.push_back(features_old[i]);
+        edge = true;
       }
       else
       {
@@ -124,24 +124,28 @@ void StructureFromMotion::featureTracker(Mat frame_in)
 
     } // end of looping through features
 
+    // remove the features with poor positioning
+    if (edge)
+    {
+      cleanFeatures();
+      edge = false;
+    }
 
     // draw the features
     drawFeatures(frame_in, features_new);
 
-    // saving the features
+    // save the features
     idx++;
     features_all.push_back(features_new);
-
-    // here use mask to clean up feature vectors (first and most recent)
-    // make mask cleanup function
-    // use findFundamentalMatrix to chop off outliers between:
-    // two most recent, first and last
-    // whenever done with cleanup, run     features_mask.clear();
 
     // update the feature vectors for next iteration
     features_old.clear();
     features_old = features_new;
     features_new.clear();
+
+    // use findFundamentalMatrix to chop off outliers between
+    // then cleanup based on RANSAC outliers
+
 
     // remember the last iteration's frame
     frame_gray_old = frame_gray.clone();
@@ -160,6 +164,34 @@ void StructureFromMotion::drawFeatures(Mat img, std::vector<Point2f>& features)
 {
   for (int i=0; i < features.size(); i++)
   {
-  circle(img, features[i], 2, Scalar(255, 0, 0), 2);
+    circle(img, features[i], 2, Scalar(255, 0, 0), 2);
   }
+}
+
+
+
+
+
+void StructureFromMotion::cleanFeatures()
+{
+  // the purpose of this method is to clean up the original and recent
+  // feature vectors based on the class member "features_mask"
+  std::vector<cv::Point2f> features_a, features_b;
+
+  for (int i=0; i<features_mask.size(); i++)
+  {
+    if (features_mask[i] == 1)
+    {
+      // keep the current feature
+      features_a.push_back(features_all[0][i]);
+      features_b.push_back(features_new[i]);
+    }
+  }
+
+  // update feature vectors
+  features_all[0] = features_a;
+  features_new    = features_b;
+
+  // clean the mask
+  features_mask.clear();
 }

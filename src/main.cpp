@@ -9,7 +9,7 @@ int main(int argc, char **argv)
   Mat img_a, img_b;
 
 
-  // here construct the logic for the in-comming video
+  // here construct the logic for the in-coming video
   // initialize the sfm object
   // new frames are passed to the sfm object (real-time logic?)
   // inside the object, the processing occurs
@@ -25,7 +25,7 @@ int main(int argc, char **argv)
   if (from_recorded)
   {
     // use frames from a pre-recorded video
-    std::string filename = "../images/vid2.webm";
+    std::string filename = "../images/vid.mp4";
     std::cout << filename << std::endl;
     video.open(filename);
   }

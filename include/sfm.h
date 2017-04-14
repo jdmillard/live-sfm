@@ -9,9 +9,11 @@ class StructureFromMotion
 		void featureTracker(cv::Mat frame_in);
 		void drawFeatures(cv::Mat img, std::vector<cv::Point2f>& features);
 		void loadCalibration();
+		void cleanFeatures();
 		cv::Mat intrinsic, distortion;
 
 		bool init = false;
+		bool edge = false;
 		int idx; // frame index
 		int sep; // keyframe separation
 
