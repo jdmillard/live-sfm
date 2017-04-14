@@ -124,12 +124,22 @@ void StructureFromMotion::featureTracker(Mat frame_in)
 
     } // end of looping through features
 
-    // remove the features with poor positioning
+    // remove the features with poor positioning if any were found
     if (edge)
     {
       cleanFeatures();
       edge = false;
     }
+    else
+    {
+      features_mask.clear();
+    }
+
+    // use findFundamentalMat to locate the outlier feature points
+    int ep_dist = 0.03 * frame_in.rows; // acceptable distance from epipolar line
+    double confidence = 0.95; // confidence of correct F matrix (0-1)
+    Mat F = findFundamentalMat(features_all[0], features_new, FM_RANSAC, ep_dist, confidence, features_mask);
+    cleanFeatures();
 
     // draw the features
     drawFeatures(frame_in, features_new);
@@ -142,10 +152,6 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     features_old.clear();
     features_old = features_new;
     features_new.clear();
-
-    // use findFundamentalMatrix to chop off outliers between
-    // then cleanup based on RANSAC outliers
-
 
     // remember the last iteration's frame
     frame_gray_old = frame_gray.clone();
