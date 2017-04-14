@@ -14,13 +14,17 @@ class StructureFromMotion
 
 		bool init = false;
 		bool edge = false;
+		bool more = true;
+
 		int idx; // frame index
 		int sep; // keyframe separation
 
 		std::vector<uchar> 										features_mask;
 		std::vector<cv::Point2f>							features_old;
 		std::vector<cv::Point2f>							features_new;
+		std::vector<cv::Point2f>							features_new_u;
 		std::vector<std::vector<cv::Point2f>> features_all;
+		std::vector<std::vector<cv::Point2f>> features_all_u;
 
 		cv::Mat frame_gray_old;
 

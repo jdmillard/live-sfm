@@ -62,6 +62,12 @@ void SphereDetector::newFrame(Mat frame_in)
     detectSpheres(frame_in);
     drawFeatures(frame_in, features_old);
 
+    if (features_old.size()<100)
+    {
+      // set algorithm to finish
+      more = false;
+    }
+
     // now use the current and original features to undistort
     // then find the fundamenal matrix
     // then find the essential matrix
@@ -125,8 +131,8 @@ std::vector<Vec3f> SphereDetector::detectSpheres(Mat frame_in)
 
 
   // group similar circles' points together
-  int minRadius = 20;
-  int maxRadius = 80;
+  int minRadius = 15;
+  int maxRadius = 40;
   groupCircles(circles, contours, contours2, minRadius, maxRadius);
 
   // derive circles with new point groups
@@ -337,7 +343,7 @@ void SphereDetector::groupCircles(std::vector<Vec3f>& circles, std::vector<std::
         double c_dist = sqrt( pow(x_diff, 2) + pow(y_diff, 2));
         double r_dist = circles[i][2] - circles[j][2];
 
-        if (i!=j && c_dist < 40 && r_dist < 40)
+        if (i!=j && c_dist < 20 && r_dist < 20)
         {
           // then add to current batch of points
           // contours2[contours2.size()-1] // is now the most recent vector of points

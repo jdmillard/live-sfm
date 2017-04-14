@@ -51,6 +51,10 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     // start saving features
     features_all.push_back(features_new);
 
+    // save the undistorted features
+    undistortPoints(features_new, features_new_u, intrinsic, distortion, noArray(), intrinsic);
+    features_all_u.push_back(features_new_u);
+
     // update the feature vectors for next iteration
     features_old.clear();
     features_old = features_new;
@@ -141,6 +145,10 @@ void StructureFromMotion::featureTracker(Mat frame_in)
     // save the features
     idx++;
     features_all.push_back(features_new);
+
+    // save the undistorted features
+    undistortPoints(features_new, features_new_u, intrinsic, distortion, noArray(), intrinsic);
+    features_all_u.push_back(features_new_u);
 
     // update the feature vectors for next iteration
     features_old.clear();
