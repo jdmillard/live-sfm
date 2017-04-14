@@ -28,8 +28,8 @@ void SphereDetector::newFrame(Mat frame_in)
     // algorithm has not yet been initialized, look to see if spheres are found
     // in the middle quarter of the image, if not keep looking
 
-    std::vector<Vec3f> circles;
-    circles = detectSpheres(frame_in);
+    //std::vector<Vec3f> circles;
+    detectSpheres(frame_in);
 
     int inside = 0;
     int left = frame_in.cols/2 - frame_in.cols/4;
@@ -37,9 +37,9 @@ void SphereDetector::newFrame(Mat frame_in)
     int top = frame_in.rows/2 - frame_in.rows/4;
     int bottom = frame_in.rows/2 + frame_in.rows/4;
 
-    for (int i=0; i<circles.size(); i++)
+    for (int i=0; i<circles2.size(); i++)
     {
-      if (circles[i][0] > left && circles[i][0] < right && circles[i][1] > top && circles[i][1] < bottom)
+      if (circles2[i][0] > left && circles2[i][0] < right && circles2[i][1] > top && circles2[i][1] < bottom)
       {
         inside++;
       }
@@ -60,7 +60,10 @@ void SphereDetector::newFrame(Mat frame_in)
     // algorithm has been initialized; run normal course
     featureTracker(frame_in);
     detectSpheres(frame_in);
+
+    // optional
     drawFeatures(frame_in, features_old);
+    drawCircles(frame_in, circles2);
 
     if (features_old.size()<100)
     {
@@ -68,7 +71,10 @@ void SphereDetector::newFrame(Mat frame_in)
       more = false;
     }
 
-    // now use the current and original features to undistort
+    // use the current and original undistorted features to get:
+    // fundamenal matrix
+    // rotation, translation
+
     // then find the fundamenal matrix
     // then find the essential matrix
     // then normalize
@@ -87,7 +93,7 @@ void SphereDetector::newFrame(Mat frame_in)
 }
 
 
-std::vector<Vec3f> SphereDetector::detectSpheres(Mat frame_in)
+void SphereDetector::detectSpheres(Mat frame_in)
 {
 
   // perform image processing required to locate spheres in the current frame
@@ -122,7 +128,8 @@ std::vector<Vec3f> SphereDetector::detectSpheres(Mat frame_in)
 
 
   // fit circles to the points
-  std::vector<Vec3f> circles, circles2;
+  circles.clear();
+  circles2.clear();
   circleFitter(contours, circles);
 
 
@@ -138,6 +145,7 @@ std::vector<Vec3f> SphereDetector::detectSpheres(Mat frame_in)
   // derive circles with new point groups
   circleFitter(contours2, circles2);
 
+  // another variance check?
 
 
   // TODO:
@@ -145,15 +153,6 @@ std::vector<Vec3f> SphereDetector::detectSpheres(Mat frame_in)
   // parameterize the circleFitter thresholds
   // optimize
   // see what pre-processing can be cut out to save time
-
-
-
-  cvtColor(frame, frame, CV_GRAY2BGR);
-  drawCircles(frame_in, circles2);
-
-  return circles2;
-
-
 
 }
 
