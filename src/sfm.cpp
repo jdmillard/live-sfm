@@ -134,7 +134,9 @@ void StructureFromMotion::featureTracker(Mat frame_in)
 
     // here use mask to clean up feature vectors (first and most recent)
     // make mask cleanup function
-    // use findFundamentalMatrix to chop off outliers
+    // use findFundamentalMatrix to chop off outliers between:
+    // two most recent, first and last
+    // whenever done with cleanup, run     features_mask.clear();
 
     // update the feature vectors for next iteration
     features_old.clear();
