@@ -61,19 +61,20 @@ void SphereDetector::newFrame(Mat frame_in)
     featureTracker(frame_in);
     detectSpheres(frame_in);
     drawFeatures(frame_in, features_old);
-    // track features to current frame
-    // if keyframe
-    //   do an overall outlier cleanup between beginning and now
-    //   find transform back to starting position using standard surviving features (features_all) use ball size to tune translation
-    //   find circles then get sets of measurements using other nearby keyframes' circle measurements (in current frame)
-    //   transform measurements them back to original frame
-    //   do least squares update on ball estimates
 
-    // (all this doesn't consider false and missing measurements)
-
+    // now use the current and original features to undistort
+    // then find the fundamenal matrix
+    // then find the essential matrix
+    // then normalize
+    // then find the R, t
+    // then use stereorectify to get Q
+    // then use the circle points and perspective transform to get coordinates
 
 
-    // when all operations are complete, increment idx for next frame
+    // (all this needs to consider false and missing measurements)
+    // some type of data association?
+
+
   }
 
 
