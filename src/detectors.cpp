@@ -60,6 +60,8 @@ void SphereDetector::newFrame(Mat frame_in)
     // algorithm has been initialized; run normal course
     featureTracker(frame_in);
     detectSpheres(frame_in);
+    getRotationTranslation();
+    scaleTranslation();
 
     // optional
     drawFeatures(frame_in, features_old);
@@ -71,13 +73,7 @@ void SphereDetector::newFrame(Mat frame_in)
       more = false;
     }
 
-    // use the current and original undistorted features to get:
-    F_new = findFundamentalMat(features_all_u[0], features_all_u[idx], FM_8POINT);
-    F_all.push_back(F_new);
 
-    // get E from F
-    // svd normalize
-    // get r and t using recoverPose
     // get P1, P2 using stereorectify
     // triangulate points to get 3d positions in homogenous coordinates
     // convertPointsFromHomogeneous

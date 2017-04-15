@@ -10,6 +10,8 @@ class StructureFromMotion
 		void drawFeatures(cv::Mat img, std::vector<cv::Point2f>& features);
 		void loadCalibration();
 		void cleanFeatures();
+		void getRotationTranslation();
+    void scaleTranslation();
 		cv::Mat intrinsic, distortion;
 
 		bool init = false;
@@ -26,8 +28,10 @@ class StructureFromMotion
 		std::vector<std::vector<cv::Point2f>> features_all;
 		std::vector<std::vector<cv::Point2f>> features_all_u;
 
-		cv::Mat 							F_new;
-		std::vector<cv::Mat>	F_all;
+		cv::Mat 							R;
+		cv::Mat 							T;
+		std::vector<cv::Mat>	R_all;
+		std::vector<cv::Mat>	T_all;
 
 		cv::Mat frame_gray_old;
 

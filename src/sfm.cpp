@@ -205,3 +205,71 @@ void StructureFromMotion::cleanFeatures()
   // clean the mask
   features_mask.clear();
 }
+
+
+
+
+
+void StructureFromMotion::getRotationTranslation()
+{
+  // if this is the first iteration, there will be no rotation/translation
+
+  if (idx==0)
+  {
+    // set no rotation and no translation
+    R = Mat::eye(3,3, CV_64F);
+    T = Mat(3,1, CV_64F);
+    T.at<double>(0,0) = 0;
+    T.at<double>(1,0) = 0;
+    T.at<double>(2,0) = 0;
+  }
+  else
+  {
+    // current and original undistorted features to get fundamental matrix:
+    Mat F = findFundamentalMat(features_all_u[0], features_all_u[idx], FM_8POINT);
+    //F_all.push_back(F_new);
+
+    // get the essential matrix
+    Mat E = intrinsic.t()*F*intrinsic;
+
+    // normalize using svd
+    Mat w, u, vt, w2;
+    SVD::compute(E, w, u, vt);
+    w2 = Mat::eye(3,3, CV_64F);     // 3x3 identity
+    w2.at<double>(2,2) = 0;         // new normalized singular values
+    E = u * w2 * vt;
+
+    // get rotation and translation using recoverPose
+    double fx = intrinsic.at<double>(0,0);
+    double fy = intrinsic.at<double>(1,1);
+    double cx = intrinsic.at<double>(0,2);
+    double cy = intrinsic.at<double>(1,2);
+
+    // decomposing the essential matrix gives us 4 combinations of possible
+    // R and T; recoverPose does the cheirality check to get the correct one
+    recoverPose(E, features_all_u[0], features_all_u[idx], R, T, fx, Point2f(cx, cy));
+
+  }
+
+
+  //std::cout << pow(pow(T.at<double>(0,0),2) + pow(T.at<double>(1,0),2) + pow(T.at<double>(2,0),2), 0.5) << std::endl;
+
+  //std::cout << "---" << std::endl;
+  //std::cout << T << std::endl;
+
+  // get E from F
+  // svd normalize
+  // get r and t using recoverPose
+
+  // translation is normalized, if we know the radius of the ball, we can
+  // back out a scale factor
+}
+
+
+
+
+
+void StructureFromMotion::scaleTranslation()
+{
+  std::cout << "here" << std::endl;
+}
