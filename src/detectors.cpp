@@ -58,12 +58,20 @@ void SphereDetector::newFrame(Mat frame_in)
   else
   {
     // algorithm has been initialized; run normal course
+
+    // track features
     featureTracker(frame_in);
+
+    // detect spheres
     detectSpheres(frame_in);
+
+    // get rotation and translation
     getRotationTranslation();
 
+    // associate circles
     circlesHierarchy(frame_in);
 
+    // resolve scale, knowing the expected diameter of spheres
     scaleTranslation();
 
     // optional

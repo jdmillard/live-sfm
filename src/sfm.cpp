@@ -274,6 +274,11 @@ void StructureFromMotion::scaleTranslation()
   // use the highest ranked circle that exists in original and current frame
   // to resolve scale ambiguity
 
-  // need a good circle hierarchy and association for this
-  //std::cout << "here" << std::endl;
+  // generate the points using the radius and assuming level camera
+
+  // find distance between
+
+  // update scale factor, then repeat
+
+
 }
