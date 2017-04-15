@@ -26,6 +26,9 @@ class StructureFromMotion
 		std::vector<std::vector<cv::Point2f>> features_all;
 		std::vector<std::vector<cv::Point2f>> features_all_u;
 
+		cv::Mat 							F_new;
+		std::vector<cv::Mat>	F_all;
+
 		cv::Mat frame_gray_old;
 
 

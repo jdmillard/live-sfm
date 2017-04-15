@@ -184,7 +184,7 @@ void StructureFromMotion::cleanFeatures()
 {
   // the purpose of this method is to clean up the original and recent
   // feature vectors based on the class member "features_mask"
-  std::vector<cv::Point2f> features_a, features_b;
+  std::vector<cv::Point2f> features_a, features_b, features_c;
 
   for (int i=0; i<features_mask.size(); i++)
   {
@@ -193,12 +193,14 @@ void StructureFromMotion::cleanFeatures()
       // keep the current feature
       features_a.push_back(features_all[0][i]);
       features_b.push_back(features_new[i]);
+      features_c.push_back(features_all_u[0][i]);
     }
   }
 
   // update feature vectors
-  features_all[0] = features_a;
-  features_new    = features_b;
+  features_all[0]   = features_a;
+  features_new      = features_b;
+  features_all_u[0] = features_c;
 
   // clean the mask
   features_mask.clear();

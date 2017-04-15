@@ -72,7 +72,10 @@ void SphereDetector::newFrame(Mat frame_in)
     }
 
     // use the current and original undistorted features to get:
-    // fundamenal matrix
+    F_new = findFundamentalMat(features_all_u[0], features_all_u[idx], FM_8POINT);
+    F_all.push_back(F_new);
+
+
     // rotation, translation
 
     // then find the fundamenal matrix
