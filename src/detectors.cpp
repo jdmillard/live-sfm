@@ -508,6 +508,12 @@ void SphereDetector::circlesHierarchy(Mat frame_in)
   circles_hierarchy.clear();
   circles_hierarchy.resize(circles_u.size());
 
+  // set them all to 500
+  for (int i=0; i<circles_hierarchy.size(); i++)
+  {
+    circles_hierarchy[i] = 500;
+  }
+
   // if this is the first iteration, establish circle id by proximity to center
   if (idx ==0)
   {
@@ -547,8 +553,6 @@ void SphereDetector::circlesHierarchy(Mat frame_in)
   else
   {
     int window = std::min(idx, 3);
-    std::cout << idx << std::endl;
-    std::cout << window << std::endl;
     // not the first frame
     // attempt to associate using undistorted nearest neighbor
     // using the last "int window" frames
@@ -561,10 +565,10 @@ void SphereDetector::circlesHierarchy(Mat frame_in)
 
 
       std::vector<Point2f> locations;
+      locations.clear();
       // for this id, look at past circles for the last "int window" frames
       for (int j=1; j<=window; j++)
       {
-        std::cout << j << std::endl;
         int found = 100;
         // circles_all_u[idx-j] is the current set of circles at hand
         // circles_hierarchy_all[idx-j] is the current set of hierarchies
@@ -589,19 +593,63 @@ void SphereDetector::circlesHierarchy(Mat frame_in)
 
       // now locations contains all the centers for the current circle index
       // average them
-      // then find the nearest neighbor of the current circles
-      // then whatever circle that is, use that index to assign "i" to the
-      // corresponding hierarchy
 
+      if (locations.size() > 0)
+      {
+        double x_sum = 0;
+        double y_sum = 0;
+        for (int j=0; j<locations.size(); j++)
+        {
+          x_sum += locations[j].x;
+          y_sum += locations[j].y;
+        }
+        x_sum = x_sum/locations.size();
+        y_sum = y_sum/locations.size();
 
+        // x_sum and y_sum are the average location of the considered circle id
+        // now find the nearest neighbor of the current circles
+        // cycle through circles_u
+        double dist_min = 1000;
+        int    dist_idx = 1000;
+        for (int j=0; j<circles_u.size(); j++)
+        {
+          double x_term = pow(circles_u[j][0]-x_sum, 2);
+          double y_term = pow(circles_u[j][1]-y_sum, 2);
+          double dist = pow((x_term + y_term), 0.5);
+          if (dist < dist_min)
+          {
+            dist_min = dist;
+            dist_idx = j;
+          }
+        }
+        std::cout << dist_min << std::endl;
+
+        // dist_idx is the index of the recent circles that is closest to the
+        // current circle id and dist_min is the distance
+
+        double dist_thresh = 20;
+        if (dist_min < dist_thresh)
+        {
+          circles_hierarchy[dist_idx] = i;
+        }
+      }
 
 
 
     }
 
+    // it's possible that not all current circles were associated
+    for (int i=0; i<circles_hierarchy.size(); i++)
+    {
+      if (circles_hierarchy[i] == 500)
+      {
+        circles_hierarchy[i] = idx_circle;
+        idx_circle++;
+      }
+    }
 
-    // if not associated, set hierarchy to 500
-    //
+    // now circles_hierarchy is populated
+    circles_hierarchy_all.push_back(circles_hierarchy);
 
     // there will be management method that looks at 3d locations and merges
 
@@ -610,4 +658,11 @@ void SphereDetector::circlesHierarchy(Mat frame_in)
 
 
   }
+  //std::cout << "---" << std::endl;
+  //for (int jj=0; jj<circles_hierarchy.size(); jj++)
+  //{
+  //  std::cout << circles_hierarchy[jj] << std::endl;
+  //}
+  //std::cout << "-" << std::endl;
+  //std::cout << idx_circle << std::endl;
 }
