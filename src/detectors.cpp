@@ -148,6 +148,31 @@ void SphereDetector::detectSpheres(Mat frame_in)
   // another variance check?
 
 
+  // undistort the circle center points
+  if (init)
+  {
+    // generate a vector of the points
+    std::vector<Point2f> centers;
+    for (int i=0; i<circles2.size(); i++)
+    {
+      centers.push_back(Point2f(circles2[i][0], circles2[i][1]));
+    }
+
+    undistortPoints(centers, centers, intrinsic, distortion, noArray(), intrinsic);
+
+    // now generate an undistorted vector of circles
+    circles_u.clear();
+    for (int i=0; i<centers.size(); i++)
+    {
+      circles_u.push_back(Vec3f(centers[i].x, centers[i].y, circles2[i][2]));
+    }
+
+    // save the undistorted circles
+    circles_all_u.push_back(circles_u);
+
+  }
+
+
   // TODO:
   // parameterize the center and radius thresholds for grouping - 40 and 40 below
   // parameterize the circleFitter thresholds

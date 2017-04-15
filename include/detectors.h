@@ -22,6 +22,13 @@ class SphereDetector: public StructureFromMotion
 
 	  std::vector<cv::Vec3f> circles;
 		std::vector<cv::Vec3f> circles2;
+		std::vector<cv::Vec3f> circles_u;
+
+		std::vector<std::vector<cv::Vec3f>> circles_all_u;
+		
+
+
+		// do undistorted version and _all
 
 	  int my_pub_val_derived;
 
