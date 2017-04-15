@@ -546,11 +546,58 @@ void SphereDetector::circlesHierarchy(Mat frame_in)
   }
   else
   {
+    int window = std::min(idx, 3);
+    std::cout << idx << std::endl;
+    std::cout << window << std::endl;
     // not the first frame
-    // first attempt to associate based on undistorted nearest neighbor
-    // need a good way to look back a few frames
+    // attempt to associate using undistorted nearest neighbor
+    // using the last "int window" frames
 
-    //circles_all_u[idx-1] is the last set of circles
+    // cycle through known circle ids
+    for (int i=0; i<idx_circle; i++)
+    {
+      // "i" is the current circle index
+      // now find all the center locations associated with this index
+
+
+      std::vector<Point2f> locations;
+      // for this id, look at past circles for the last "int window" frames
+      for (int j=1; j<=window; j++)
+      {
+        std::cout << j << std::endl;
+        int found = 100;
+        // circles_all_u[idx-j] is the current set of circles at hand
+        // circles_hierarchy_all[idx-j] is the current set of hierarchies
+        // find the index where "i" is found in circles_hierarchy_all[idx-j]
+        for (int k=0; k<circles_hierarchy_all[idx-j].size(); k++)
+        {
+          // we care about when circles_hierarchy_all[idx-j][k]=i
+          if (circles_hierarchy_all[idx-j][k]==i)
+          {
+            found = k;
+          }
+        }
+
+        if (found!=100)
+        {
+          // found is now the index such that circles_all_u[idx-j][found]
+          double xx = circles_all_u[idx-j][found][0];
+          double yy = circles_all_u[idx-j][found][1];
+          locations.push_back(Point2f(xx,yy));
+        }
+      }
+
+      // now locations contains all the centers for the current circle index
+      // average them
+      // then find the nearest neighbor of the current circles
+      // then whatever circle that is, use that index to assign "i" to the
+      // corresponding hierarchy
+
+
+
+
+
+    }
 
 
     // if not associated, set hierarchy to 500

@@ -275,5 +275,5 @@ void StructureFromMotion::scaleTranslation()
   // to resolve scale ambiguity
 
   // need a good circle hierarchy and association for this
-  std::cout << "here" << std::endl;
+  //std::cout << "here" << std::endl;
 }
