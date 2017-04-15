@@ -269,16 +269,62 @@ void StructureFromMotion::getRotationTranslation()
 
 
 
-void StructureFromMotion::scaleTranslation()
+void StructureFromMotion::scaleTranslation(std::vector<std::vector<int>> circles_hierarchy_all, int idx_circle)
 {
-  // use the highest ranked circle that exists in original and current frame
-  // to resolve scale ambiguity
+  // find the highest rank id that is found in both current and original frames
+  // circles_hierarchy_all[0]
+  // circles_hierarchy_all[idx]
 
-  // generate the points using the radius and assuming level camera
+  int rank_common = 0;
+  int idx_original = 500; // index of the chosen original circle
+  int idx_current = 500; // index of the chosen current circle
+  bool contin = true;
+  while (contin)
+  {
+    for (int i=0; i<circles_hierarchy_all[0].size(); i++)
+    {
+      if (circles_hierarchy_all[0][i] == rank_common)
+      {
+        idx_original = i;
+      }
+    }
+    for (int i=0; i<circles_hierarchy_all[idx].size(); i++)
+    {
+      if (circles_hierarchy_all[idx][i] == rank_common)
+      {
+        idx_current = i;
+      }
+    }
 
-  // find distance between
+    if (idx_original==500 || idx_current==500)
+    {
+      // the suggested common rank wasn't found in both
+      rank_common++;
+      int idx_original = 500;
+      int idx_current = 500;
+    }
+    else
+    {
+      contin = false;
+      //std::cout << "found mutual rank" << std::endl;
+      //std::cout << rank_common << std::endl;
+    }
 
-  // update scale factor, then repeat
+    if (rank_common > idx_circle)
+    {
+      contin = false;
+      std::cout << "CIRCLE ASSOCIATION ERROR" << std::endl;
+    }
+  }
+
+  // now idx_current and idx_original reprsent the indices of matching
+  // circles from the beginning to current sets of circles
+
+  // we can create mutual centerpoints and radial points (assuming level camera)
+  // find the 3d locatons
+  // then use the distance to resolve scale ambiguity
+
+
 
 
 }

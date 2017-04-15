@@ -72,7 +72,7 @@ void SphereDetector::newFrame(Mat frame_in)
     circlesHierarchy(frame_in);
 
     // resolve scale, knowing the expected diameter of spheres
-    scaleTranslation();
+    scaleTranslation(circles_hierarchy_all, idx_circle);
 
     // optional
     drawFeatures(frame_in, features_old);
@@ -630,7 +630,7 @@ void SphereDetector::circlesHierarchy(Mat frame_in)
             dist_idx = j;
           }
         }
-        std::cout << dist_min << std::endl;
+        //std::cout << dist_min << std::endl;
 
         // dist_idx is the index of the recent circles that is closest to the
         // current circle id and dist_min is the distance

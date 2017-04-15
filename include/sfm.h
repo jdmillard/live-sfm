@@ -11,7 +11,7 @@ class StructureFromMotion
 		void loadCalibration();
 		void cleanFeatures();
 		void getRotationTranslation();
-    void scaleTranslation();
+    void scaleTranslation(std::vector<std::vector<int>> circles_hierarchy_all, int idx_circle);
 		cv::Mat intrinsic, distortion;
 
 		bool init = false;
