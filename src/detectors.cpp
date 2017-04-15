@@ -75,19 +75,25 @@ void SphereDetector::newFrame(Mat frame_in)
     F_new = findFundamentalMat(features_all_u[0], features_all_u[idx], FM_8POINT);
     F_all.push_back(F_new);
 
+    // get E from F
+    // svd normalize
+    // get r and t using recoverPose
+    // get P1, P2 using stereorectify
+    // triangulate points to get 3d positions in homogenous coordinates
+    // convertPointsFromHomogeneous
 
-    // rotation, translation
+    // https://stackoverflow.com/questions/31431047/3d-reconstruction-from-two-calibrated-cameras-where-is-the-error-in-this-pipel
+    // http://www.morethantechnical.com/2012/01/04/simple-triangulation-with-opencv-from-harley-zisserman-w-code/
 
-    // then find the fundamenal matrix
-    // then find the essential matrix
-    // then normalize
-    // then find the R, t
-    // then use stereorectify to get Q
-    // then use the circle points and perspective transform to get coordinates
+
 
 
     // (all this needs to consider false and missing measurements)
     // some type of data association?
+    // idea for this: first order circles by distance to center
+    // then use nearest neighbor to associate across frames
+    // only find 3d points from a to b for circles that both registered a measurement
+    // only display 3d points that have a threshold of number of measurements
 
 
   }
