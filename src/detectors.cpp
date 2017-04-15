@@ -540,6 +540,7 @@ void SphereDetector::circlesHierarchy(Mat frame_in)
     }
 
     // now circles_hierarchy corresponds to circles_u
+    circles_hierarchy_all.push_back(circles_hierarchy);
 
 
   }
@@ -547,9 +548,13 @@ void SphereDetector::circlesHierarchy(Mat frame_in)
   {
     // not the first frame
     // first attempt to associate based on undistorted nearest neighbor
+    // need a good way to look back a few frames
 
-    // then if there are no nearest neighbors,
-    // initialize a new circle
+    //circles_all_u[idx-1] is the last set of circles
+
+
+    // if not associated, set hierarchy to 500
+    //
 
     // there will be management method that looks at 3d locations and merges
 
