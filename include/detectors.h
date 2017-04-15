@@ -18,11 +18,15 @@ class SphereDetector: public StructureFromMotion
 		void circleFitter(std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Vec3f>& circles);
 		void groupCircles(std::vector<cv::Vec3f>& circles, std::vector<std::vector<cv::Point>>& contours, std::vector<std::vector<cv::Point>>& contours2, int minRadius, int maxRadius);
 		void colorVariance(cv::Mat frame_in, std::vector<cv::Vec3f>& circles);
+    void circlesHierarchy(cv::Mat frame_in);
 		cv::Mat frame, frame_exp;
+
+    int idx_circle = 0;
 
 	  std::vector<cv::Vec3f> circles;
 		std::vector<cv::Vec3f> circles2;
 		std::vector<cv::Vec3f> circles_u;
+    std::vector<int>       circles_hierarchy;
 
 		std::vector<std::vector<cv::Vec3f>> circles_all_u;
 

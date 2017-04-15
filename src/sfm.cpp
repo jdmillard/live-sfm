@@ -271,5 +271,9 @@ void StructureFromMotion::getRotationTranslation()
 
 void StructureFromMotion::scaleTranslation()
 {
+  // use the highest ranked circle that exists in original and current frame
+  // to resolve scale ambiguity
+
+  // need a good circle hierarchy and association for this
   std::cout << "here" << std::endl;
 }

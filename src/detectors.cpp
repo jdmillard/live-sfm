@@ -61,6 +61,9 @@ void SphereDetector::newFrame(Mat frame_in)
     featureTracker(frame_in);
     detectSpheres(frame_in);
     getRotationTranslation();
+
+    circlesHierarchy(frame_in);
+
     scaleTranslation();
 
     // optional
@@ -494,3 +497,65 @@ void SphereDetector::colorVariance(Mat frame_in, std::vector<Vec3f>& circles)
 
 
 } // end of method
+
+
+
+
+
+void SphereDetector::circlesHierarchy(Mat frame_in)
+{
+  // reset hierarchy
+  circles_hierarchy.clear();
+  circles_hierarchy.resize(circles_u.size());
+
+  // if this is the first iteration, establish circle id by proximity to center
+  if (idx ==0)
+  {
+
+    double dist_floor = 0;
+    for (int j=0; j<circles_u.size(); j++)
+    {
+      // cycle through circles_u, putting values in circles_hierarchy vector
+      double dist_min = 1000;
+      int    dist_idx = 1000;
+      for (int i=0; i<circles_u.size(); i++)
+      {
+        // find distance to center of image
+        double x_term = pow(circles_u[i][0]-(frame_in.cols/2), 2);
+        double y_term = pow(circles_u[i][1]-(frame_in.rows/2), 2);
+        double dist = pow((x_term + y_term), 0.5);
+        if (dist < dist_min && dist > dist_floor)
+        {
+          dist_min = dist;
+          dist_idx = i;
+        }
+      }
+
+      // now dist_min is the smallest distance and dist_idx is the index
+      // associated with this circle
+
+      circles_hierarchy[dist_idx] = idx_circle;
+      idx_circle++;
+      dist_floor = dist_min;
+    }
+
+    // now circles_hierarchy corresponds to circles_u
+
+
+  }
+  else
+  {
+    // not the first frame
+    // first attempt to associate based on undistorted nearest neighbor
+
+    // then if there are no nearest neighbors,
+    // initialize a new circle
+
+    // there will be management method that looks at 3d locations and merges
+
+    // what about circles that are added along the way?
+
+
+
+  }
+}
