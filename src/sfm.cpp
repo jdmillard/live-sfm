@@ -395,11 +395,30 @@ void StructureFromMotion::triangulatePointsCustom(Mat frame_in, int idx_circle, 
     {
       // no A can be updated since there was no association for this circle
     }
+
+    // now use the A matrices to update the 3d position estimation X
+    // this is the same as minimizing A*X which is a matter of finding the
+    // right-singular vector associated with the smallest singular value
+    // (the bottom row of vt)
+
+    // generate the SVD (*.u, *.w, *.vt are the resulting object members)
+    // and extract the bottom row of vt (same as right column of v)
+    SVD svd_decomp(A_all[i]);
+    Mat Xh = svd_decomp.vt.row(svd_decomp.vt.rows - 1);
+
+    // Xh is the 3d position in homogenous coordinates
+
+    std::cout << "---" << std::endl;
+    std::cout << i << std::endl;
+    std::cout << Xh << std::endl;
+
+
+
   }
 
   // all A matrices have been updated for circles that were associated
+  // corresponding position estimates have been updated as well
 
-  
 
 
 
