@@ -2,6 +2,30 @@
 
 using namespace cv;
 
+// Mat triangulate_Linear_LS(Mat mat_P_l, Mat mat_P_r, Mat warped_back_l, Mat warped_back_r)
+// {
+//     Mat A(4,3,CV_64FC1), b(4,1,CV_64FC1), X(3,1,CV_64FC1), X_homogeneous(4,1,CV_64FC1), W(1,1,CV_64FC1);
+//     W.at<double>(0,0) = 1.0;
+//     A.at<double>(0,0) = (warped_back_l.at<double>(0,0)/warped_back_l.at<double>(2,0))*mat_P_l.at<double>(2,0) - mat_P_l.at<double>(0,0);
+//     A.at<double>(0,1) = (warped_back_l.at<double>(0,0)/warped_back_l.at<double>(2,0))*mat_P_l.at<double>(2,1) - mat_P_l.at<double>(0,1);
+//     A.at<double>(0,2) = (warped_back_l.at<double>(0,0)/warped_back_l.at<double>(2,0))*mat_P_l.at<double>(2,2) - mat_P_l.at<double>(0,2);
+//     A.at<double>(1,0) = (warped_back_l.at<double>(1,0)/warped_back_l.at<double>(2,0))*mat_P_l.at<double>(2,0) - mat_P_l.at<double>(1,0);
+//     A.at<double>(1,1) = (warped_back_l.at<double>(1,0)/warped_back_l.at<double>(2,0))*mat_P_l.at<double>(2,1) - mat_P_l.at<double>(1,1);
+//     A.at<double>(1,2) = (warped_back_l.at<double>(1,0)/warped_back_l.at<double>(2,0))*mat_P_l.at<double>(2,2) - mat_P_l.at<double>(1,2);
+//     A.at<double>(2,0) = (warped_back_r.at<double>(0,0)/warped_back_r.at<double>(2,0))*mat_P_r.at<double>(2,0) - mat_P_r.at<double>(0,0);
+//     A.at<double>(2,1) = (warped_back_r.at<double>(0,0)/warped_back_r.at<double>(2,0))*mat_P_r.at<double>(2,1) - mat_P_r.at<double>(0,1);
+//     A.at<double>(2,2) = (warped_back_r.at<double>(0,0)/warped_back_r.at<double>(2,0))*mat_P_r.at<double>(2,2) - mat_P_r.at<double>(0,2);
+//     A.at<double>(3,0) = (warped_back_r.at<double>(1,0)/warped_back_r.at<double>(2,0))*mat_P_r.at<double>(2,0) - mat_P_r.at<double>(1,0);
+//     A.at<double>(3,1) = (warped_back_r.at<double>(1,0)/warped_back_r.at<double>(2,0))*mat_P_r.at<double>(2,1) - mat_P_r.at<double>(1,1);
+//     A.at<double>(3,2) = (warped_back_r.at<double>(1,0)/warped_back_r.at<double>(2,0))*mat_P_r.at<double>(2,2) - mat_P_r.at<double>(1,2);
+//     b.at<double>(0,0) = -((warped_back_l.at<double>(0,0)/warped_back_l.at<double>(2,0))*mat_P_l.at<double>(2,3) - mat_P_l.at<double>(0,3));
+//     b.at<double>(1,0) = -((warped_back_l.at<double>(1,0)/warped_back_l.at<double>(2,0))*mat_P_l.at<double>(2,3) - mat_P_l.at<double>(1,3));
+//     b.at<double>(2,0) = -((warped_back_r.at<double>(0,0)/warped_back_r.at<double>(2,0))*mat_P_r.at<double>(2,3) - mat_P_r.at<double>(0,3));
+//     b.at<double>(3,0) = -((warped_back_r.at<double>(1,0)/warped_back_r.at<double>(2,0))*mat_P_r.at<double>(2,3) - mat_P_r.at<double>(1,3));
+//     solve(A,b,X,DECOMP_SVD);
+//     vconcat(X,W,X_homogeneous);
+//     return X_homogeneous;
+// }
 
 void StructureFromMotion::loadCalibration()
 {
@@ -269,7 +293,38 @@ void StructureFromMotion::getRotationTranslation()
 
 
 
-void StructureFromMotion::scaleTranslation(std::vector<std::vector<int>> circles_hierarchy_all, int idx_circle)
+void StructureFromMotion::triangulatePointsCustom(Mat frame_in)
+{
+  // stereoRectify and R/T will give us the respective camera projections where
+  // x1 = P1*X1
+  // x2 = P2*X2
+  // where x and X are camera frame and world frame homogenous coordinates
+
+  // we use these relationships to create an Ax = 0 overdetermined system
+  // where we can find the x based on the right singular vecor associated with
+  // the smallest singular value
+
+  // so ultimately, we maintain an A matrix for each ranked circle
+
+  // get P1 and P2 using stereoRectify
+  Mat R1, R2, P1, P2, Q;
+  stereoRectify(  intrinsic, distortion,
+                  intrinsic, distortion,
+                  frame_in.size(),  R,  T,
+                  R1, R2, P1, P2, Q );
+
+  // more
+
+  
+
+
+}
+
+
+
+
+/*
+void StructureFromMotion::scaleTranslation(Mat frame_in, std::vector<std::vector<Vec3f>> circles_all_u, std::vector<std::vector<int>> circles_hierarchy_all, int idx_circle)
 {
   // find the highest rank id that is found in both current and original frames
   // circles_hierarchy_all[0]
@@ -320,6 +375,74 @@ void StructureFromMotion::scaleTranslation(std::vector<std::vector<int>> circles
   // now idx_current and idx_original reprsent the indices of matching
   // circles from the beginning to current sets of circles
 
+  // circles_all_u[0][idx_original]  < original circle
+  // circles_all_u[inx][idx_current] < current circle
+
+  // get P1 and P2 using stereoRectify
+  Mat R1, R2, P1, P2, Q;
+  stereoRectify(  intrinsic, distortion,
+                  intrinsic, distortion,
+                  frame_in.size(),  R,  T,
+                  R1, R2, P1, P2, Q );
+
+
+
+
+
+
+  //pts1 needs to be vector of Point2f containing the center and edge of original
+  //pts2 needs to be vector of Point2f containing the center and edge of current
+
+  Point2f center_o = Point2f(circles_all_u[0][idx_original][0], circles_all_u[0][idx_original][1]);
+  Point2f edge_o   = Point2f(circles_all_u[0][idx_original][0]+circles_all_u[0][idx_original][2], circles_all_u[0][idx_original][1]);
+
+  Point2f center_c = Point2f(circles_all_u[idx][idx_current][0], circles_all_u[idx][idx_current][1]);
+  Point2f edge_c   = Point2f(circles_all_u[idx][idx_current][0]+circles_all_u[idx][idx_current][2], circles_all_u[idx][idx_current][1]);
+
+  // the first number is dimension of points
+  // the second number is the number of points
+  //Mat pts_out(4,2,CV_64FC1);
+  //Mat pts1(2,2,CV_64FC1);
+  //Mat pts2(2,2,CV_64FC1);
+
+
+  std::vector<Point2f> pts1, pts2;
+  Mat pts_out;
+  pts1.push_back(center_o);
+  pts1.push_back(edge_o);
+  pts2.push_back(center_c);
+  pts2.push_back(edge_c);
+
+
+  triangulatePoints(P1, P2, pts1, pts2, pts_out);
+
+  // pts_out is 2x4 (4,2)
+  // 2 columns and 4 rows
+  //std::cout << pts_out.cols << std::endl;
+  //std::cout << pts_out.rows << std::endl;
+
+  std::vector<Vec4f> test;
+  std::vector<Vec3f> test2;
+
+  for (int i=0; i<pts_out.cols; i++)
+  {
+    double val1 = pts_out.at<double>(0,i);
+    double val2 = pts_out.at<double>(1,i);
+    double val3 = pts_out.at<double>(2,i);
+    double val4 = pts_out.at<double>(3,i);
+    test.push_back(Vec4f(val1,val2,val3,val4));
+  }
+
+  convertPointsFromHomogeneous(test, test2);
+
+  std::cout << T << std::endl;
+  std::cout << test2[0] << std::endl;
+
+  // from notes on paper - store an A for each hierarchy and add to it
+  // the svd solution to AX = 0 will always be the answer.
+
+
+  //std::cout << pts_out2.size() << std::endl;
   // we can create mutual centerpoints and radial points (assuming level camera)
   // find the 3d locatons
   // then use the distance to resolve scale ambiguity
@@ -328,3 +451,4 @@ void StructureFromMotion::scaleTranslation(std::vector<std::vector<int>> circles
 
 
 }
+*/

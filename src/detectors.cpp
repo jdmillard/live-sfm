@@ -65,14 +65,18 @@ void SphereDetector::newFrame(Mat frame_in)
     // detect spheres
     detectSpheres(frame_in);
 
-    // get rotation and translation
-    getRotationTranslation();
-
     // associate circles
     circlesHierarchy(frame_in);
 
     // resolve scale, knowing the expected diameter of spheres
-    scaleTranslation(circles_hierarchy_all, idx_circle);
+    if (idx>4)
+    {
+      // get rotation and translation
+      getRotationTranslation();
+      // perform triangulation
+      triangulatePointsCustom(frame_in);
+      //scaleTranslation(frame_in, circles_all_u, circles_hierarchy_all, idx_circle);
+    }
 
     // optional
     drawFeatures(frame_in, features_old);
