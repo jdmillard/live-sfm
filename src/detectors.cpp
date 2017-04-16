@@ -257,12 +257,22 @@ void SphereDetector::drawStatus(Mat img)
     String num, x_str, y_str, z_str;
     Point2f place;
     num = std::to_string(i);
-    //x_str = "x="+std::to_string(four_3d[kk].x).substr(0,5);
-    //y_str = "y="+std::to_string(four_3d[kk].y).substr(0,5);
-    //z_str = "z="+std::to_string(four_3d[kk].z).substr(0,5);
+    x_str = "x="+std::to_string(X_all[i].at<double>(0,0)).substr(0,4);
+    y_str = "y="+std::to_string(X_all[i].at<double>(0,1)).substr(0,4);
+    z_str = "z="+std::to_string(X_all[i].at<double>(0,2)).substr(0,4);
     place.x = circles_u[idx_current][0];
     place.y = circles_u[idx_current][1];
-    putText(img, num, place, FONT_HERSHEY_SIMPLEX, 0.4, Scalar(0,0,255), 1);
+    putText(img, num, place, FONT_HERSHEY_SIMPLEX, 0.7, color, thickness);
+    int gap = 40;
+    int spread = 30;
+    double mag = 1;
+    place.x = circles_u[idx_current][0]+gap;
+    place.y = circles_u[idx_current][1]-gap;
+    putText(img, x_str, place, FONT_HERSHEY_SIMPLEX, mag, color, thickness);
+    place.y = place.y + spread;
+    putText(img, y_str, place, FONT_HERSHEY_SIMPLEX, mag, color, thickness);
+    place.y = place.y + spread;
+    putText(img, z_str, place, FONT_HERSHEY_SIMPLEX, mag, color, thickness);
 
 
   }

@@ -34,7 +34,7 @@ class StructureFromMotion
     cv::Mat               X = cv::Mat(1,3,CV_64FC1);
 
     std::vector<cv::Mat> A_all;
-    std::vector<cv::Mat> X_all;
+    std::vector<cv::Mat> X_all; // doesn't carry a history, this "all" is just the current collection
 
 		cv::Mat frame_gray_old;
 
