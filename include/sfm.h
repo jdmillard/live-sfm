@@ -11,7 +11,7 @@ class StructureFromMotion
 		void loadCalibration();
 		void cleanFeatures();
 		void getRotationTranslation();
-    void triangulatePointsCustom(cv::Mat frame_in);
+    void triangulatePointsCustom(cv::Mat frame_in, int idx_circle, std::vector<std::vector<cv::Vec3f>> circles_all_u, std::vector<std::vector<int>> circles_hierarchy_all);
     //void scaleTranslation(cv::Mat frame_in, std::vector<std::vector<cv::Vec3f>> circles_all_u, std::vector<std::vector<int>> circles_hierarchy_all, int idx_circle);
 		cv::Mat intrinsic, distortion;
 
@@ -31,6 +31,8 @@ class StructureFromMotion
 
 		cv::Mat 							R;
 		cv::Mat 							T;
+
+    std::vector<cv::Mat> A_all;
 		//std::vector<cv::Mat>	R_all;
 		//std::vector<cv::Mat>	T_all;
 

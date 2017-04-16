@@ -74,7 +74,7 @@ void SphereDetector::newFrame(Mat frame_in)
       // get rotation and translation
       getRotationTranslation();
       // perform triangulation
-      triangulatePointsCustom(frame_in);
+      triangulatePointsCustom(frame_in, idx_circle, circles_all_u, circles_hierarchy_all);
       //scaleTranslation(frame_in, circles_all_u, circles_hierarchy_all, idx_circle);
     }
 

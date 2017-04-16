@@ -293,7 +293,7 @@ void StructureFromMotion::getRotationTranslation()
 
 
 
-void StructureFromMotion::triangulatePointsCustom(Mat frame_in)
+void StructureFromMotion::triangulatePointsCustom(Mat frame_in, int idx_circle, std::vector<std::vector<Vec3f>> circles_all_u, std::vector<std::vector<int>> circles_hierarchy_all)
 {
   // stereoRectify and R/T will give us the respective camera projections where
   // x1 = P1*X1
@@ -313,9 +313,96 @@ void StructureFromMotion::triangulatePointsCustom(Mat frame_in)
                   frame_in.size(),  R,  T,
                   R1, R2, P1, P2, Q );
 
-  // more
+  // initialize A_all to match the circles detected in the first frame
+  if (A_all.size()==0)
+  {
+    A_all.resize(circles_all_u[0].size());
+  }
+
+  for (int i=0; i<A_all.size(); i++)
+  {
+    // i is the current rank being considered
+    // if this rank number is found in both frames, then we'll update
+    // the corresponding A matrix which is A_all[i]
+
+    int idx_original, idx_current;
+    // find the circles_all_u[0] index of the circle for this rank
+    for (int j=0; j<circles_all_u[0].size(); j++)
+    {
+      if (circles_hierarchy_all[0][j] == i)
+      idx_original = j;
+    }
+    // find the circles_all_u[idx] index of the circle for this rank
+    idx_current = 500;
+    for (int j=0; j<circles_all_u[idx].size(); j++)
+    {
+      if (circles_hierarchy_all[idx][j] == i)
+      idx_current = j;
+    }
+
+    if (idx_current!=500)
+    {
+      // the current frame detected the circle for this rank
+      //std::cout << "----" << std::endl;
+      //std::cout << idx_original << std::endl;
+      //std::cout << idx_current << std::endl;
+
+      // use P1 and P2 along with the x and y camera frame values
+      // to populate an A block
+
+      Mat A(4,4,CV_64FC1);
+      double x, y;
+
+      // first do the original point with P1
+      x = circles_all_u[0][idx_original][0];
+      y = circles_all_u[0][idx_original][1];
+      // first row (x*p2_vec - p0_vec)
+      A.at<double>(0,0) = P1.at<double>(2,0)*x - P1.at<double>(0,0);
+      A.at<double>(0,1) = P1.at<double>(2,1)*x - P1.at<double>(0,1);
+      A.at<double>(0,2) = P1.at<double>(2,2)*x - P1.at<double>(0,2);
+      A.at<double>(0,3) = P1.at<double>(2,3)*x - P1.at<double>(0,3);
+      // second row (y*p2_vec - p1_vec)
+      A.at<double>(1,0) = P1.at<double>(2,0)*y - P1.at<double>(1,0);
+      A.at<double>(1,1) = P1.at<double>(2,1)*y - P1.at<double>(1,1);
+      A.at<double>(1,2) = P1.at<double>(2,2)*y - P1.at<double>(1,2);
+      A.at<double>(1,3) = P1.at<double>(2,3)*y - P1.at<double>(1,3);
+
+      // now do the current point with P2
+      x = circles_all_u[idx][idx_current][0];
+      y = circles_all_u[idx][idx_current][1];
+      // first row (x*p2_vec - p0_vec)
+      A.at<double>(2,0) = P2.at<double>(2,0)*x - P2.at<double>(0,0);
+      A.at<double>(2,1) = P2.at<double>(2,1)*x - P2.at<double>(0,1);
+      A.at<double>(2,2) = P2.at<double>(2,2)*x - P2.at<double>(0,2);
+      A.at<double>(2,3) = P2.at<double>(2,3)*x - P2.at<double>(0,3);
+      // second row (y*p2_vec - p1_vec)
+      A.at<double>(3,0) = P2.at<double>(2,0)*y - P2.at<double>(1,0);
+      A.at<double>(3,1) = P2.at<double>(2,1)*y - P2.at<double>(1,1);
+      A.at<double>(3,2) = P2.at<double>(2,2)*y - P2.at<double>(1,2);
+      A.at<double>(3,3) = P2.at<double>(2,3)*y - P2.at<double>(1,3);
+
+      // now vertically concatenate with A_all[i]
+      if (A_all[i].rows==0)
+      {
+        A_all[i] = A;
+      }
+      else
+      {
+        vconcat(A_all[i], A, A_all[i]);
+      }
+    }
+    else
+    {
+      // no A can be updated since there was no association for this circle
+    }
+  }
+
+  // all A matrices have been updated for circles that were associated
 
   
+
+
+
 
 
 }
