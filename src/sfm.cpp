@@ -407,10 +407,21 @@ void StructureFromMotion::triangulatePointsCustom(Mat frame_in, int idx_circle, 
     Mat Xh = svd_decomp.vt.row(svd_decomp.vt.rows - 1);
 
     // Xh is the 3d position in homogenous coordinates
+    //std::cout << Xh.rows << std::endl;
+    //std::cout << Xh.cols << std::endl;
+
+    Mat X(1,3,CV_64FC1);
+    //std::cout << X.rows << std::endl;
+    //std::cout << X.cols << std::endl;
+
+    X.at<double>(0,0) = Xh.at<double>(0,0)/Xh.at<double>(0,3);
+    X.at<double>(0,1) = Xh.at<double>(0,1)/Xh.at<double>(0,3);
+    X.at<double>(0,2) = Xh.at<double>(0,2)/Xh.at<double>(0,3);
 
     std::cout << "---" << std::endl;
     std::cout << i << std::endl;
-    std::cout << Xh << std::endl;
+    std::cout << X << std::endl;
+
 
 
 
