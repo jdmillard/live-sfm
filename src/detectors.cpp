@@ -69,13 +69,14 @@ void SphereDetector::newFrame(Mat frame_in)
     circlesHierarchy(frame_in);
 
     // resolve scale, knowing the expected diameter of spheres
-    if (idx>4)
+    if (idx>3)
     {
       // get rotation and translation
       getRotationTranslation();
       // perform triangulation
       triangulatePointsCustom(frame_in, idx_circle, circles_all_u, circles_hierarchy_all);
       //scaleTranslation(frame_in, circles_all_u, circles_hierarchy_all, idx_circle);
+      drawStatus(frame_in);
     }
 
     // optional
@@ -85,6 +86,7 @@ void SphereDetector::newFrame(Mat frame_in)
     if (features_old.size()<100)
     {
       // set algorithm to finish
+      std::cout << "not enough features" << std::endl;
       more = false;
     }
 
@@ -221,6 +223,48 @@ void SphereDetector::drawCircles(Mat img, std::vector<Vec3f>& circles)
       Point2f center = Point2f(circles[i][0],circles[i][1]);
       circle(img, center, circles[i][2], color, thickness );
     }
+  }
+}
+
+
+
+
+
+void SphereDetector::drawStatus(Mat img)
+{
+  // the purpose of this method is to easily draw circles wherever detected
+
+  Scalar color = Scalar(255, 0, 0);
+  int thickness = 2;
+  // cycle through each
+  for (int i=0; i<X_all.size(); i++)
+  {
+    // i is the current rank
+
+    // find the index of the current set of circles that matches this
+    int idx_current = 500;
+    for (int j=0; j<circles_hierarchy.size(); j++)
+    {
+      if (circles_hierarchy[j]==i)
+      {
+        idx_current = j;
+      }
+    }
+
+    // idx_current is the index of circles_u that corresponds with i
+    // use these coordinates to putText
+
+    String num, x_str, y_str, z_str;
+    Point2f place;
+    num = std::to_string(i);
+    //x_str = "x="+std::to_string(four_3d[kk].x).substr(0,5);
+    //y_str = "y="+std::to_string(four_3d[kk].y).substr(0,5);
+    //z_str = "z="+std::to_string(four_3d[kk].z).substr(0,5);
+    place.x = circles_u[idx_current][0];
+    place.y = circles_u[idx_current][1];
+    putText(img, num, place, FONT_HERSHEY_SIMPLEX, 0.4, Scalar(0,0,255), 1);
+
+
   }
 }
 
@@ -564,7 +608,7 @@ void SphereDetector::circlesHierarchy(Mat frame_in)
   }
   else
   {
-    int window = std::min(idx, 3);
+    int window = std::min(idx, 8);
     // not the first frame
     // attempt to associate using undistorted nearest neighbor
     // using the last "int window" frames

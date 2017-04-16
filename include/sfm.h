@@ -31,10 +31,10 @@ class StructureFromMotion
 
 		cv::Mat 							R;
 		cv::Mat 							T;
+    cv::Mat               X = cv::Mat(1,3,CV_64FC1);
 
     std::vector<cv::Mat> A_all;
-		//std::vector<cv::Mat>	R_all;
-		//std::vector<cv::Mat>	T_all;
+    std::vector<cv::Mat> X_all;
 
 		cv::Mat frame_gray_old;
 

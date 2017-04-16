@@ -317,6 +317,7 @@ void StructureFromMotion::triangulatePointsCustom(Mat frame_in, int idx_circle, 
   if (A_all.size()==0)
   {
     A_all.resize(circles_all_u[0].size());
+    X_all.resize(circles_all_u[0].size());
   }
 
   for (int i=0; i<A_all.size(); i++)
@@ -403,27 +404,29 @@ void StructureFromMotion::triangulatePointsCustom(Mat frame_in, int idx_circle, 
 
     // generate the SVD (*.u, *.w, *.vt are the resulting object members)
     // and extract the bottom row of vt (same as right column of v)
-    SVD svd_decomp(A_all[i]);
-    Mat Xh = svd_decomp.vt.row(svd_decomp.vt.rows - 1);
+    if (A_all[i].rows>0)
+    {
+      SVD svd_decomp(A_all[i]);
+      Mat Xh = svd_decomp.vt.row(svd_decomp.vt.rows - 1);
 
-    // Xh is the 3d position in homogenous coordinates
-    //std::cout << Xh.rows << std::endl;
-    //std::cout << Xh.cols << std::endl;
+      // Xh is the 3d position in homogenous coordinates
+      //std::cout << Xh.rows << std::endl;
+      //std::cout << Xh.cols << std::endl;
 
-    Mat X(1,3,CV_64FC1);
-    //std::cout << X.rows << std::endl;
-    //std::cout << X.cols << std::endl;
+      //Mat X(1,3,CV_64FC1);
+      //std::cout << X.rows << std::endl;
+      //std::cout << X.cols << std::endl;
 
-    X.at<double>(0,0) = Xh.at<double>(0,0)/Xh.at<double>(0,3);
-    X.at<double>(0,1) = Xh.at<double>(0,1)/Xh.at<double>(0,3);
-    X.at<double>(0,2) = Xh.at<double>(0,2)/Xh.at<double>(0,3);
+      X.at<double>(0,0) = Xh.at<double>(0,0)/Xh.at<double>(0,3);
+      X.at<double>(0,1) = Xh.at<double>(0,1)/Xh.at<double>(0,3);
+      X.at<double>(0,2) = Xh.at<double>(0,2)/Xh.at<double>(0,3);
 
-    std::cout << "---" << std::endl;
-    std::cout << i << std::endl;
-    std::cout << X << std::endl;
+      std::cout << "---" << std::endl;
+      std::cout << i << std::endl;
+      std::cout << X << std::endl;
 
-
-
+      X_all[i] = X;
+    }
 
   }
 
