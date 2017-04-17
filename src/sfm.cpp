@@ -316,6 +316,7 @@ void StructureFromMotion::triangulatePointsCustom(Mat frame_in, int idx_circle, 
   // initialize A_all to match the circles detected in the first frame
   if (A_all.size()==0)
   {
+    std::cout << "resizing X_all" << std::endl;
     A_all.resize(circles_all_u[0].size());
     X_all.resize(circles_all_u[0].size());
   }
@@ -421,11 +422,13 @@ void StructureFromMotion::triangulatePointsCustom(Mat frame_in, int idx_circle, 
       X.at<double>(0,1) = Xh.at<double>(0,1)/Xh.at<double>(0,3);
       X.at<double>(0,2) = Xh.at<double>(0,2)/Xh.at<double>(0,3);
 
+      X_all[i] = X.clone();
+
       std::cout << "---" << std::endl;
       std::cout << i << std::endl;
-      std::cout << X << std::endl;
+      std::cout << X_all[i] << std::endl;
 
-      X_all[i] = X;
+
     }
 
   }
