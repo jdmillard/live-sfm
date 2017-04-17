@@ -36,6 +36,11 @@ int main(int argc, char **argv)
     video.open(0);
   }
 
+  // create a video write object for recording avi
+  VideoWriter VOut;
+  // initialize video write object
+  VOut.open("VideoOut.avi", CV_FOURCC('M', 'P', 'E', 'G') , 30, Size(640, 480), 1);
+
   namedWindow("The Frame", CV_WINDOW_AUTOSIZE);
   moveWindow("The Frame", 50, 50);
 
@@ -54,7 +59,15 @@ int main(int argc, char **argv)
       break;
     }
 
+    // uncomment these lines to get timing printed to screen
+    //auto t0 = std::chrono::high_resolution_clock::now();
     sfm.newFrame(frame);
+    //auto t1 = std::chrono::high_resolution_clock::now();
+    //auto dt = 1.e-9*std::chrono::duration_cast<std::chrono::nanoseconds>(t1-t0).count();
+    //std::cout << "It took "<< dt <<" second(s)."<< std::endl;
+
+    // save frame to video file
+    VOut << frame;
 
     // display the frame
     imshow("The Frame", frame);

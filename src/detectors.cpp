@@ -98,6 +98,10 @@ void SphereDetector::newFrame(Mat frame_in)
     // https://stackoverflow.com/questions/31431047/3d-reconstruction-from-two-calibrated-cameras-where-is-the-error-in-this-pipel
     // http://www.morethantechnical.com/2012/01/04/simple-triangulation-with-opencv-from-harley-zisserman-w-code/
 
+    // slide 25 of this was helpful
+    //https://www.ics.uci.edu/~dramanan/teaching/cs116_fall08/lec/reconstruction.pdf
+
+    
 
 
 
@@ -268,11 +272,11 @@ void SphereDetector::drawStatus(Mat img)
     double mag = 1;
     place.x = circles_u[idx_current][0]+gap;
     place.y = circles_u[idx_current][1]-gap;
-    putText(img, x_str, place, FONT_HERSHEY_SIMPLEX, mag, color, thickness);
+    //putText(img, x_str, place, FONT_HERSHEY_SIMPLEX, mag, color, thickness);
     place.y = place.y + spread;
-    putText(img, y_str, place, FONT_HERSHEY_SIMPLEX, mag, color, thickness);
+    //putText(img, y_str, place, FONT_HERSHEY_SIMPLEX, mag, color, thickness);
     place.y = place.y + spread;
-    putText(img, z_str, place, FONT_HERSHEY_SIMPLEX, mag, color, thickness);
+    //putText(img, z_str, place, FONT_HERSHEY_SIMPLEX, mag, color, thickness);
 
 
   }
